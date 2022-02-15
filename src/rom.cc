@@ -1,12 +1,17 @@
 #include "rom.h"
 
 #include <cassert>
+#include <cstdio>
 #include <fstream>
-#include <iostream>
 
 namespace gbemu {
 
-u8 Rom::read(const u16 addr) const { return data[addr]; }
+u8 Rom::read(const u16 addr) const {
+  if (addr >= rom_size) {
+    assert(false);
+  }
+  return data[addr];
+}
 
 void Rom::load(const std::string &filename) {
   std::ifstream fin(filename, std::ios::in | std::ios::binary);
