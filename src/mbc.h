@@ -12,17 +12,16 @@ enum class BankingMode { SimpleRomBankingMode, RamBankingMode };
 
 class Mbc {
  public:
-  virtual ~Mbc() = 0;
+  virtual ~Mbc();
   virtual u8 read(const u16 addr) const = 0;
   virtual void write(const u16 addr, const u8 value) = 0;
 };
 
 class RomOnly : public Mbc {
  public:
-  RomOnly(const Rom& rom) : rom(rom){};
-  ~RomOnly(){};
-  u8 read(const u16 addr) const;
-  void write(const u16 addr, const u8 value);
+  RomOnly(const Rom& rom_) : rom(rom_) {}
+  u8 read(const u16 addr) const override;
+  void write(const u16 addr, const u8 value) override;
 
  private:
   const Rom& rom;
@@ -31,19 +30,19 @@ class RomOnly : public Mbc {
 
 class Mbc1 : public Mbc {
  public:
-  Mbc1(const Rom& rom) : rom(rom) {
+  Mbc1(const Rom& rom_) : rom(rom_) {
     if (rom.rom_size >= (1 << 30)) {
       is_large_rom = true;
     }
     if (rom.ram_size > 8 * 1024) {
       is_large_ram = true;
     }
-  };
-  u8 read(const u16 addr) const;
-  void write(const u16 addr, const u8 value);
+  }
+  u8 read(const u16 addr) const override;
+  void write(const u16 addr, const u8 value) override;
 
  private:
-  u64 calcRomAddress(const u16 addr) const;
+  u16 calcRomAddress(const u16 addr) const;
   u64 calcRamAddress(const u16 addr) const;
   const Rom& rom;
   std::array<u8, 32 * 1024> ram;

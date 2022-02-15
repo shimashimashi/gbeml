@@ -11,14 +11,14 @@ namespace gbemu {
 
 class Cpu {
  public:
-  Cpu(Bus* bus) : bus(bus) {
-    Register* af = new Register();
-    Register* bc = new Register();
-    Register* de = new Register();
-    Register* hl = new Register();
-    Register* pc = new Register();
-    Register* sp = new Register();
-  };
+  Cpu(Bus* bus_) : bus(bus_) {
+    af = new Register();
+    bc = new Register();
+    de = new Register();
+    hl = new Register();
+    pc = new Register();
+    sp = new Register();
+  }
 
  private:
   Bus* bus;
@@ -85,28 +85,28 @@ class Cpu {
   void load_a_r(u8 opcode);
 
   // 11110010
-  void load_a_c(u8 opcode);
+  void load_a_c();
 
   // 11100010
-  void load_c_a(u8 opcode);
+  void load_c_a();
 
   // 11100000
-  void load_n_a(u8 opcode);
+  void load_n_a();
 
   // 11110000
-  void load_a_n(u8 opcode);
+  void load_a_n();
 
   // 00xx0001
   void load_r_n16(u8 opcode);
 
   // 11111001
-  void load_sp_hl(u8 opcode);
+  void load_sp_hl();
 
   // 11111000
-  void load_hl_sp_n8(u8 opcode);
+  void load_hl_sp_n8();
 
   // 00001000
-  void load_n16_sp(u8 opcode);
+  void load_n16_sp();
 
   // 11xx0101
   void push(u8 opcode);
@@ -115,18 +115,18 @@ class Cpu {
   void pop(u8 opcode);
 
   // 11101010
-  void load_n16_a(u8 opcode);
+  void load_n16_a();
 
   // 11111010
-  void load_a_n16(u8 opcode);
+  void load_a_n16();
 
   // 01110110
-  void halt(u8 opcode);
+  void halt();
 
   bool match(u8 opcode, const std::string& pattern);
 
-  u16 getRegister(u8 r);
-  void setRegister(u8 r, u16 n);
+  u8 getRegister(u8 r);
+  void setRegister(u8 r, u8 n);
 
   u8 readMemory(u16 addr);
   void writeMemory(u16 addr, u8 value);

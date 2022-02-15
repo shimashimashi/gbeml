@@ -9,7 +9,7 @@ namespace gbemu {
 
 class Bus {
  public:
-  Bus(Mbc* mbc) : mbc(mbc) {}
+  Bus(Mbc* mbc_) : mbc(mbc_) {}
   void tick();
   u8 read(u16 addr) const;
   void write(u16 addr, u8 value);

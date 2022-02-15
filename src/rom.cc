@@ -22,7 +22,9 @@ void Rom::load(const std::string &filename) {
 
   u8 byte;
   while (!fin.eof()) {
-    fin.read((char *)&byte, sizeof(char));
+    char c;
+    fin.read(&c, sizeof(char));
+    byte = static_cast<u8>(c);
     if (fin.eof()) break;
     data.push_back(byte);
   }
@@ -34,8 +36,8 @@ void Rom::load(const std::string &filename) {
 bool Rom::isValid() {
   if (data.size() != rom_size) {
     fprintf(stderr,
-            "Cartridge size is invalid. actual = %zu, expected = %zu.\n",
-            data.size(), (size_t)rom_size);
+            "Cartridge size is invalid. actual = %zu, expected = %llu.\n",
+            data.size(), rom_size);
     return false;
   }
 
@@ -65,25 +67,25 @@ void Rom::setHeaders() {
     return;
   }
 
-  for (i64 i = 0; i < 4; ++i) {
+  for (u64 i = 0; i < 4; ++i) {
     entry_point[i] = data[0x100 + i];
   }
 
-  for (i64 i = 0; i < 49; ++i) {
+  for (u64 i = 0; i < 49; ++i) {
     nintendo_logo[i] = data[0x104 + i];
   }
 
-  for (i64 i = 0; i < 17; ++i) {
+  for (u64 i = 0; i < 17; ++i) {
     title[i] = data[0x134 + i];
   }
 
-  for (i64 i = 0; i < 4; ++i) {
+  for (u64 i = 0; i < 4; ++i) {
     manufacturer_code[i] = data[0x13f + i];
   }
 
   cgb_flag = data[0x143];
 
-  for (i64 i = 0; i < 2; ++i) {
+  for (u64 i = 0; i < 2; ++i) {
     new_licensee_code[i] = data[0x144 + i];
   }
 
@@ -103,7 +105,7 @@ void Rom::setHeaders() {
 
   header_checksum = data[0x14d];
 
-  for (i64 i = 0; i < 2; ++i) {
+  for (u64 i = 0; i < 2; ++i) {
     global_checksum[i] = data[0x14e + i];
   }
 }

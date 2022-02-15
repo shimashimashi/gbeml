@@ -49,7 +49,7 @@ u8 Cpu::fetch() {
 
 void Cpu::execute(u8 opcode) {
   if (match(opcode, "01110110")) {
-    halt(opcode);
+    halt();
   } else if (match(opcode, "00xxx110")) {
     load_r_n8(opcode);
   } else if (match(opcode, "01xxxyyy")) {
@@ -57,21 +57,21 @@ void Cpu::execute(u8 opcode) {
   } else if (match(opcode, "00xx0010")) {
     load_r_a(opcode);
   } else if (match(opcode, "11110010")) {
-    load_a_c(opcode);
+    load_a_c();
   } else if (match(opcode, "11100010")) {
-    load_c_a(opcode);
+    load_c_a();
   } else if (match(opcode, "11100000")) {
-    load_n_a(opcode);
+    load_n_a();
   } else if (match(opcode, "11110000")) {
-    load_a_n(opcode);
+    load_a_n();
   } else if (match(opcode, "00xx0001")) {
     load_r_n16(opcode);
   } else if (match(opcode, "11111001")) {
-    load_sp_hl(opcode);
+    load_sp_hl();
   } else if (match(opcode, "11111001")) {
-    load_hl_sp_n8(opcode);
+    load_hl_sp_n8();
   } else if (match(opcode, "00001000")) {
-    load_n16_sp(opcode);
+    load_n16_sp();
   } else if (match(opcode, "11xx0101")) {
     push(opcode);
   } else if (match(opcode, "11xx0001")) {
@@ -92,7 +92,7 @@ void Cpu::load_r_n8(u8 opcode) {
 void Cpu::load_r_r(u8 opcode) {
   u8 r1 = (opcode & 0b00111000) >> 3;
   u8 r2 = opcode & 0b00000111;
-  u16 n = getRegister(r2);
+  u8 n = getRegister(r2);
   setRegister(r1, n);
 }
 
@@ -145,19 +145,19 @@ void Cpu::load_a_r(u8 opcode) {
 }
 
 // 11110010
-void Cpu::load_a_c(u8 opcode) { set_a(readMemory(0xff00 + get_c())); }
+void Cpu::load_a_c() { set_a(readMemory(0xff00 + get_c())); }
 
 // 11100010
-void Cpu::load_c_a(u8 opcode) { writeMemory(0xff00 + get_c(), get_a()); }
+void Cpu::load_c_a() { writeMemory(0xff00 + get_c(), get_a()); }
 
 // 11100000
-void Cpu::load_n_a(u8 opcode) {
+void Cpu::load_n_a() {
   u8 n = fetch();
   writeMemory(0xff00 + n, get_a());
 }
 
 // 11110000
-void Cpu::load_a_n(u8 opcode) {
+void Cpu::load_a_n() {
   u8 n = fetch();
   set_a(readMemory(0xff00 + n));
 }
@@ -188,13 +188,13 @@ void Cpu::load_r_n16(u8 opcode) {
 }
 
 // 11111001
-void Cpu::load_sp_hl(u8 opcode) {
+void Cpu::load_sp_hl() {
   sp->set(get_hl());
   stalls += 4;
 }
 
 // 11111000
-void Cpu::load_hl_sp_n8(u8 opcode) {
+void Cpu::load_hl_sp_n8() {
   u8 n = fetch();
   set_hl(sp->get() + n);
   set_z(false);
@@ -205,12 +205,13 @@ void Cpu::load_hl_sp_n8(u8 opcode) {
 }
 
 // 00001000
-void Cpu::load_n16_sp(u8 opcode) {
+void Cpu::load_n16_sp() {
   u8 l = fetch();
   u8 h = fetch();
   u16 n = concat(h, l);
 
-  writeMemory(n, sp->get());
+  writeMemory(n, sp->getLow());
+  writeMemory(n + 1, sp->getHigh());
   stalls += 8;
 }
 
@@ -248,11 +249,11 @@ void Cpu::push(u8 opcode) {
 
 // 11xx0001
 void Cpu::pop(u8 opcode) {
-  u8 h = readMemory(sp->get());
-  sp->increment();
   u8 l = readMemory(sp->get());
   sp->increment();
-  u16 n = (static_cast<u16>(h) << 8) + l;
+  u8 h = readMemory(sp->get());
+  sp->increment();
+  u16 n = concat(h, l);
 
   switch (opcode & 0b00110000 >> 4) {
     case 0:
@@ -274,18 +275,18 @@ void Cpu::pop(u8 opcode) {
 }
 
 // 11101010
-void Cpu::load_n16_a(u8 opcode) {}
+void Cpu::load_n16_a() {}
 
 // 11111010
-void Cpu::load_a_n16(u8 opcode) {}
+void Cpu::load_a_n16() {}
 
-void Cpu::halt(u8 opcode) {
+void Cpu::halt() {
   fprintf(stderr, "halt not implemented.\n");
   return;
 }
 
 bool Cpu::match(u8 opcode, const std::string& pattern) {
-  for (int i = 0; i < 8; ++i) {
+  for (u8 i = 0; i < 8; ++i) {
     if (pattern[i] == '0' || pattern[i] == '1') {
       char bit = opcode >> (7 - i) & 1 ? '1' : '0';
       if (bit != pattern[i]) {
@@ -296,7 +297,7 @@ bool Cpu::match(u8 opcode, const std::string& pattern) {
   return true;
 }
 
-u16 Cpu::getRegister(u8 r) {
+u8 Cpu::getRegister(u8 r) {
   switch (r) {
     case 0:
       return get_b();
@@ -320,8 +321,8 @@ u16 Cpu::getRegister(u8 r) {
   }
 }
 
-void Cpu::setRegister(u8 r, u16 n) {
-  switch (n) {
+void Cpu::setRegister(u8 r, u8 n) {
+  switch (r) {
     case 0:
       set_b(n);
       break;
@@ -364,7 +365,7 @@ void Cpu::writeMemory(u16 addr, u8 value) {
 
 bool Cpu::isCarrySetAdd8(u8 n1, u8 n2) {
   u16 n = static_cast<u16>(n1) + n2;
-  return n > 0xffff;
+  return n > 0xff;
 }
 
 bool Cpu::isCarrySetAdd4(u8 n1, u8 n2) {
@@ -374,6 +375,8 @@ bool Cpu::isCarrySetAdd4(u8 n1, u8 n2) {
   return n > 0x0f;
 }
 
-u16 Cpu::concat(u8 n1, u8 n2) { return (static_cast<u16>(n1) << 8) + n2; }
+u16 Cpu::concat(u8 n1, u8 n2) {
+  return static_cast<u16>((static_cast<u16>(n1) << 8)) + n2;
+}
 
 }  // namespace gbemu

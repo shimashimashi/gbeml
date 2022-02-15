@@ -5,7 +5,7 @@
 
 namespace gbemu {
 
-Mbc::~Mbc(){};
+Mbc::~Mbc() {}
 
 u8 RomOnly::read(const u16 addr) const {
   if (addr >= 0xa000) {
@@ -15,6 +15,7 @@ u8 RomOnly::read(const u16 addr) const {
 }
 
 void RomOnly::write(const u16 addr, const u8 value) {
+  fprintf(stderr, "Cannot write %x to %x in Rom\n", value, addr);
   assert(false);
   return;
 }
@@ -70,16 +71,16 @@ void Mbc1::write(const u16 addr, const u8 value) {
   }
 }
 
-u64 Mbc1::calcRomAddress(const u16 addr) const {
+u16 Mbc1::calcRomAddress(const u16 addr) const {
   if (addr <= 0x3fff) {
     if (bankingMode == BankingMode::RamBankingMode && is_large_rom) {
-      u64 bank_number = ram_bank_number << 5;
+      u16 bank_number = static_cast<u16>(ram_bank_number << 5);
       return 0x4000 * bank_number + addr;
     } else {
       return addr;
     }
   } else {
-    u64 bank_number = (ram_bank_number << 5) + rom_bank_number;
+    u16 bank_number = static_cast<u16>(ram_bank_number << 5) + rom_bank_number;
     if (rom_bank_number == 0) {
       bank_number++;
     }

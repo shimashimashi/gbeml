@@ -24,9 +24,6 @@ int main(int argc, char* argv[]) {
     case gbemu::CartridgeType::Mbc1:
       mbc = new gbemu::Mbc1(*rom);
       break;
-    default:
-      assert(false);
-      return 1;
   }
 
   std::cout << "OK" << std::endl;
