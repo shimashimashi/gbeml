@@ -3,4 +3,7 @@ add_executable(
     main.cc
     mbc.cc
     rom.cc
+    cpu.cc
+    bus.cc
+    register.cc
 )
