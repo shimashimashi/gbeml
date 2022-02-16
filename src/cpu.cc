@@ -8,11 +8,13 @@ u16 Cpu::get_af() { return af->get(); }
 u16 Cpu::get_bc() { return bc->get(); }
 u16 Cpu::get_de() { return de->get(); }
 u16 Cpu::get_hl() { return hl->get(); }
+u16 Cpu::get_sp() { return sp->get(); }
 
 void Cpu::set_af(u16 n) { return af->set(n); }
 void Cpu::set_bc(u16 n) { return bc->set(n); }
 void Cpu::set_de(u16 n) { return de->set(n); }
 void Cpu::set_hl(u16 n) { return hl->set(n); }
+void Cpu::set_sp(u16 n) { return sp->set(n); }
 
 u8 Cpu::get_a() { return af->getHigh(); }
 u8 Cpu::get_f() { return af->getLow(); }
@@ -179,7 +181,7 @@ void Cpu::load_r_n16(u8 opcode) {
       set_hl(n);
       break;
     case 3:
-      sp->set(n);
+      set_sp(n);
       break;
     default:
       assert(false);
@@ -189,14 +191,14 @@ void Cpu::load_r_n16(u8 opcode) {
 
 // 11111001
 void Cpu::load_sp_hl() {
-  sp->set(get_hl());
+  set_sp(get_hl());
   stalls += 4;
 }
 
 // 11111000
 void Cpu::load_hl_sp_n8() {
   u8 n = fetch();
-  set_hl(sp->get() + n);
+  set_hl(get_sp() + n);
   set_z(false);
   set_n(false);
   set_hcy(isCarrySetAdd4(sp->getLow(), n));
@@ -241,17 +243,17 @@ void Cpu::push(u8 opcode) {
       break;
   }
   sp->decrement();
-  writeMemory(sp->get(), h);
+  writeMemory(get_sp(), h);
   sp->decrement();
-  writeMemory(sp->get(), l);
+  writeMemory(get_sp(), l);
   stalls += 4;
 }
 
 // 11xx0001
 void Cpu::pop(u8 opcode) {
-  u8 l = readMemory(sp->get());
+  u8 l = readMemory(get_sp());
   sp->increment();
-  u8 h = readMemory(sp->get());
+  u8 h = readMemory(get_sp());
   sp->increment();
   u16 n = concat(h, l);
 
@@ -373,10 +375,6 @@ bool Cpu::isCarrySetAdd4(u8 n1, u8 n2) {
   n2 &= 0x0f;
   u8 n = n1 + n2;
   return n > 0x0f;
-}
-
-u16 Cpu::concat(u8 n1, u8 n2) {
-  return static_cast<u16>((static_cast<u16>(n1) << 8)) + n2;
 }
 
 }  // namespace gbemu

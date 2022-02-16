@@ -15,6 +15,8 @@ typedef int16_t i16;
 typedef int32_t i32;
 typedef int64_t i64;
 
+u16 concat(u8 h, u8 l);
+
 }  // namespace gbemu
 
 #endif  // GBEMU_TYPES_H_

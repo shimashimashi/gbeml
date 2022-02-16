@@ -35,11 +35,13 @@ class Cpu {
   u16 get_bc();
   u16 get_de();
   u16 get_hl();
+  u16 get_sp();
 
   void set_af(u16 n);
   void set_bc(u16 n);
   void set_de(u16 n);
   void set_hl(u16 n);
+  void set_sp(u16 n);
 
   u8 get_a();
   u8 get_f();
