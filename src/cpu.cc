@@ -4,6 +4,17 @@
 
 namespace gbemu {
 
+void Cpu::tick() {
+  if (stalls > 0) {
+    stalls--;
+    return;
+  }
+
+  u8 byte = fetch();
+  Opcode* opcode = new Opcode(byte);
+  execute(*opcode);
+}
+
 u16 Cpu::get_af() { return af->get(); }
 u16 Cpu::get_bc() { return bc->get(); }
 u16 Cpu::get_de() { return de->get(); }
@@ -49,58 +60,58 @@ u8 Cpu::fetch() {
   return value;
 }
 
-void Cpu::execute(u8 opcode) {
-  if (match(opcode, "01110110")) {
+void Cpu::execute(const Opcode& opcode) {
+  if (opcode.match("01110110")) {
     halt();
-  } else if (match(opcode, "00xxx110")) {
+  } else if (opcode.match("00xxx110")) {
     load_r_n8(opcode);
-  } else if (match(opcode, "01xxxyyy")) {
+  } else if (opcode.match("01xxxyyy")) {
     load_r_r(opcode);
-  } else if (match(opcode, "00xx0010")) {
+  } else if (opcode.match("00xx0010")) {
     load_r_a(opcode);
-  } else if (match(opcode, "11110010")) {
+  } else if (opcode.match("11110010")) {
     load_a_c();
-  } else if (match(opcode, "11100010")) {
+  } else if (opcode.match("11100010")) {
     load_c_a();
-  } else if (match(opcode, "11100000")) {
+  } else if (opcode.match("11100000")) {
     load_n_a();
-  } else if (match(opcode, "11110000")) {
+  } else if (opcode.match("11110000")) {
     load_a_n();
-  } else if (match(opcode, "00xx0001")) {
+  } else if (opcode.match("00xx0001")) {
     load_r_n16(opcode);
-  } else if (match(opcode, "11111001")) {
+  } else if (opcode.match("11111001")) {
     load_sp_hl();
-  } else if (match(opcode, "11111001")) {
+  } else if (opcode.match("11111001")) {
     load_hl_sp_n8();
-  } else if (match(opcode, "00001000")) {
+  } else if (opcode.match("00001000")) {
     load_n16_sp();
-  } else if (match(opcode, "11xx0101")) {
+  } else if (opcode.match("11xx0101")) {
     push(opcode);
-  } else if (match(opcode, "11xx0001")) {
+  } else if (opcode.match("11xx0001")) {
     pop(opcode);
   } else {
-    fprintf(stderr, "opcode %x not implemented.\n", opcode);
+    fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
   }
 }
 
 // 00xxx110
-void Cpu::load_r_n8(u8 opcode) {
-  u8 r = (opcode & 0b00111000) >> 3;
+void Cpu::load_r_n8(const Opcode& opcode) {
+  u8 r = opcode.slice(3, 5);
   u8 n = fetch();
   setRegister(r, n);
 }
 
 // 01xxxyyy
-void Cpu::load_r_r(u8 opcode) {
-  u8 r1 = (opcode & 0b00111000) >> 3;
-  u8 r2 = opcode & 0b00000111;
+void Cpu::load_r_r(const Opcode& opcode) {
+  u8 r1 = opcode.slice(3, 5);
+  u8 r2 = opcode.slice(0, 2);
   u8 n = getRegister(r2);
   setRegister(r1, n);
 }
 
 // 00xx0010
-void Cpu::load_r_a(u8 opcode) {
-  switch (opcode >> 4) {
+void Cpu::load_r_a(const Opcode& opcode) {
+  switch (opcode.slice(4, 5)) {
     case 0:
       writeMemory(get_bc(), get_a());
       break;
@@ -122,9 +133,9 @@ void Cpu::load_r_a(u8 opcode) {
 }
 
 // 00xx1010
-void Cpu::load_a_r(u8 opcode) {
+void Cpu::load_a_r(const Opcode& opcode) {
   u8 value;
-  switch (opcode >> 4) {
+  switch (opcode.slice(4, 5)) {
     case 0:
       value = readMemory(get_bc());
       break;
@@ -165,12 +176,12 @@ void Cpu::load_a_n() {
 }
 
 // 00xx0001
-void Cpu::load_r_n16(u8 opcode) {
+void Cpu::load_r_n16(const Opcode& opcode) {
   u8 n1 = fetch();
   u8 n2 = fetch();
   u16 n = concat(n2, n1);
 
-  switch (opcode >> 4) {
+  switch (opcode.slice(4, 5)) {
     case 0:
       set_bc(n);
       break;
@@ -218,10 +229,10 @@ void Cpu::load_n16_sp() {
 }
 
 // 11xx0101
-void Cpu::push(u8 opcode) {
+void Cpu::push(const Opcode& opcode) {
   u8 h;
   u8 l;
-  switch (opcode & 0b00110000 >> 4) {
+  switch (opcode.slice(4, 5)) {
     case 0:
       h = get_b();
       l = get_c();
@@ -250,14 +261,14 @@ void Cpu::push(u8 opcode) {
 }
 
 // 11xx0001
-void Cpu::pop(u8 opcode) {
+void Cpu::pop(const Opcode& opcode) {
   u8 l = readMemory(get_sp());
   sp->increment();
   u8 h = readMemory(get_sp());
   sp->increment();
   u16 n = concat(h, l);
 
-  switch (opcode & 0b00110000 >> 4) {
+  switch (opcode.slice(4, 5)) {
     case 0:
       set_bc(n);
       break;
@@ -285,18 +296,6 @@ void Cpu::load_a_n16() {}
 void Cpu::halt() {
   fprintf(stderr, "halt not implemented.\n");
   return;
-}
-
-bool Cpu::match(u8 opcode, const std::string& pattern) {
-  for (u8 i = 0; i < 8; ++i) {
-    if (pattern[i] == '0' || pattern[i] == '1') {
-      char bit = opcode >> (7 - i) & 1 ? '1' : '0';
-      if (bit != pattern[i]) {
-        return false;
-      }
-    }
-  }
-  return true;
 }
 
 u8 Cpu::getRegister(u8 r) {
