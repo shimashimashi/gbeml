@@ -10,6 +10,7 @@ add_library(
     register.cc
     types.cc
     opcode.cc
+    alu.cc
 )
 target_compile_options(
     gbemu_core PUBLIC

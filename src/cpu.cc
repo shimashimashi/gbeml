@@ -27,64 +27,88 @@ void Cpu::set_de(u16 n) { return de->set(n); }
 void Cpu::set_hl(u16 n) { return hl->set(n); }
 void Cpu::set_sp(u16 n) { return sp->set(n); }
 
-u8 Cpu::get_a() { return af->getHigh(); }
-u8 Cpu::get_f() { return af->getLow(); }
-u8 Cpu::get_b() { return bc->getHigh(); }
-u8 Cpu::get_c() { return bc->getLow(); }
-u8 Cpu::get_d() { return de->getHigh(); }
-u8 Cpu::get_e() { return de->getLow(); }
-u8 Cpu::get_h() { return hl->getHigh(); }
-u8 Cpu::get_l() { return hl->getLow(); }
-bool Cpu::get_z() { return af->getAt(7); }
-bool Cpu::get_n() { return af->getAt(6); }
-bool Cpu::get_hcy() { return af->getAt(5); }
-bool Cpu::get_cy() { return af->getAt(4); }
+u8 Cpu::get_a() { return a->get(); }
+u8 Cpu::get_f() { return f->get(); }
+u8 Cpu::get_b() { return b->get(); }
+u8 Cpu::get_c() { return c->get(); }
+u8 Cpu::get_d() { return d->get(); }
+u8 Cpu::get_e() { return e->get(); }
+u8 Cpu::get_h() { return h->get(); }
+u8 Cpu::get_l() { return l->get(); }
 
-void Cpu::set_a(u8 n) { af->setHigh(n); }
-void Cpu::set_f(u8 n) { af->setLow(n); }
-void Cpu::set_b(u8 n) { bc->setHigh(n); }
-void Cpu::set_c(u8 n) { bc->setLow(n); }
-void Cpu::set_d(u8 n) { de->setHigh(n); }
-void Cpu::set_e(u8 n) { de->setLow(n); }
-void Cpu::set_h(u8 n) { hl->setHigh(n); }
-void Cpu::set_l(u8 n) { hl->setLow(n); }
-void Cpu::set_z(bool b) { af->setAt(7, b); }
-void Cpu::set_n(bool b) { af->setAt(6, b); }
-void Cpu::set_hcy(bool b) { af->setAt(5, b); }
-void Cpu::set_cy(bool b) { af->setAt(4, b); }
+void Cpu::set_a(u8 n) { a->set(n); }
+void Cpu::set_f(u8 n) { f->set(n); }
+void Cpu::set_b(u8 n) { b->set(n); }
+void Cpu::set_c(u8 n) { c->set(n); }
+void Cpu::set_d(u8 n) { d->set(n); }
+void Cpu::set_e(u8 n) { e->set(n); }
+void Cpu::set_h(u8 n) { h->set(n); }
+void Cpu::set_l(u8 n) { l->set(n); }
+
+void Cpu::set_z(bool i) { f->setAt(3, i); }
+void Cpu::set_n(bool i) { f->setAt(2, i); }
+void Cpu::set_hcy(bool i) { f->setAt(1, i); }
+void Cpu::set_cy(bool i) { f->setAt(0, i); }
 
 u8 Cpu::fetch() {
   u8 value = readMemory(pc->get());
   pc->increment();
-  stalls += 4;
   return value;
 }
 
 void Cpu::execute(const Opcode& opcode) {
-  if (opcode.match("01110110")) {
-    halt();
-  } else if (opcode.match("00xxx110")) {
-    load_r_n8(opcode);
-  } else if (opcode.match("01xxxyyy")) {
-    load_r_r(opcode);
+  if (opcode.match("00001000")) {
+    load_n16_sp();
+  } else if (opcode.match("00xx0001")) {
+    load_r_n16(opcode);
   } else if (opcode.match("00xx0010")) {
     load_r_a(opcode);
-  } else if (opcode.match("11110010")) {
-    load_a_c();
+  } else if (opcode.match("00xx0011")) {
+    inc_r16(opcode);
+  } else if (opcode.match("00xx1001")) {
+    add_hl_r(opcode);
+  } else if (opcode.match("00xx1011")) {
+    dec_r16(opcode);
+  } else if (opcode.match("00xxx110")) {
+    load_r_n8(opcode);
+  } else if (opcode.match("01110110")) {
+    halt();
+  } else if (opcode.match("01xxxyyy")) {
+    load_r_r(opcode);
+  } else if (opcode.match("10000xxx")) {
+    add_a_r(opcode);
+  } else if (opcode.match("10001xxx")) {
+    addc_a_r(opcode);
+  } else if (opcode.match("10010xxx")) {
+    sub_a_r(opcode);
+  } else if (opcode.match("10011xxx")) {
+    subc_a_r(opcode);
+  } else if (opcode.match("10100xxx")) {
+    and_a_r(opcode);
+  } else if (opcode.match("10101xxx")) {
+    xor_a_r(opcode);
+  } else if (opcode.match("10110xxx")) {
+    or_a_r(opcode);
+  } else if (opcode.match("10111xxx")) {
+    cp_a_r(opcode);
+  } else if (opcode.match("00xxx100")) {
+    inc_r8(opcode);
+  } else if (opcode.match("00xxx101")) {
+    dec_r8(opcode);
   } else if (opcode.match("11100010")) {
     load_c_a();
   } else if (opcode.match("11100000")) {
     load_n_a();
+  } else if (opcode.match("11101000")) {
+    add_sp_n();
   } else if (opcode.match("11110000")) {
     load_a_n();
-  } else if (opcode.match("00xx0001")) {
-    load_r_n16(opcode);
+  } else if (opcode.match("11110010")) {
+    load_a_c();
+  } else if (opcode.match("11111000")) {
+    load_hl_sp_n8();
   } else if (opcode.match("11111001")) {
     load_sp_hl();
-  } else if (opcode.match("11111001")) {
-    load_hl_sp_n8();
-  } else if (opcode.match("00001000")) {
-    load_n16_sp();
   } else if (opcode.match("11xx0101")) {
     push(opcode);
   } else if (opcode.match("11xx0001")) {
@@ -94,19 +118,18 @@ void Cpu::execute(const Opcode& opcode) {
   }
 }
 
-// 00xxx110
 void Cpu::load_r_n8(const Opcode& opcode) {
   u8 r = opcode.slice(3, 5);
   u8 n = fetch();
-  setRegister(r, n);
+  writeHalfRegister(r, n);
 }
 
 // 01xxxyyy
 void Cpu::load_r_r(const Opcode& opcode) {
   u8 r1 = opcode.slice(3, 5);
   u8 r2 = opcode.slice(0, 2);
-  u8 n = getRegister(r2);
-  setRegister(r1, n);
+  u8 n = readHalfRegister(r2);
+  writeHalfRegister(r1, n);
 }
 
 // 00xx0010
@@ -176,11 +199,9 @@ void Cpu::load_a_n() {
 }
 
 // 00xx0001
+// cycles = 12
 void Cpu::load_r_n16(const Opcode& opcode) {
-  u8 n1 = fetch();
-  u8 n2 = fetch();
-  u16 n = concat(n2, n1);
-
+  u16 n = fetchWord();
   switch (opcode.slice(4, 5)) {
     case 0:
       set_bc(n);
@@ -201,85 +222,74 @@ void Cpu::load_r_n16(const Opcode& opcode) {
 }
 
 // 11111001
+// cycles = 8
 void Cpu::load_sp_hl() {
   set_sp(get_hl());
   stalls += 4;
 }
 
 // 11111000
+// cycles = 12
 void Cpu::load_hl_sp_n8() {
-  u8 n = fetch();
-  set_hl(get_sp() + n);
-  set_z(false);
-  set_n(false);
-  set_hcy(isCarrySetAdd4(sp->getLow(), n));
-  set_cy(isCarrySetAdd8(sp->getLow(), n));
+  alu->add_sp_n8(sp, fetch());
+  set_hl(get_sp());
   stalls += 4;
 }
 
 // 00001000
+// cycles = 20
 void Cpu::load_n16_sp() {
-  u8 l = fetch();
-  u8 h = fetch();
-  u16 n = concat(h, l);
-
-  writeMemory(n, sp->getLow());
-  writeMemory(n + 1, sp->getHigh());
-  stalls += 8;
+  u16 word = fetchWord();
+  writeWord(get_sp(), word);
 }
 
 // 11xx0101
+// cycles = 16
 void Cpu::push(const Opcode& opcode) {
-  u8 h;
-  u8 l;
+  u16 word;
   switch (opcode.slice(4, 5)) {
     case 0:
-      h = get_b();
-      l = get_c();
+      word = get_bc();
       break;
     case 1:
-      h = get_d();
-      l = get_e();
+      word = get_de();
       break;
     case 2:
-      h = get_h();
-      l = get_l();
+      word = get_hl();
       break;
     case 3:
-      h = get_a();
-      l = get_f();
+      word = get_af();
       break;
     default:
       assert(false);
       break;
   }
+
   sp->decrement();
-  writeMemory(get_sp(), h);
   sp->decrement();
-  writeMemory(get_sp(), l);
+  writeWord(get_sp(), word);
   stalls += 4;
 }
 
 // 11xx0001
+// cycles = 12
 void Cpu::pop(const Opcode& opcode) {
-  u8 l = readMemory(get_sp());
+  u16 word = readWord(get_sp());
   sp->increment();
-  u8 h = readMemory(get_sp());
   sp->increment();
-  u16 n = concat(h, l);
 
   switch (opcode.slice(4, 5)) {
     case 0:
-      set_bc(n);
+      set_bc(word);
       break;
     case 1:
-      set_de(n);
+      set_de(word);
       break;
     case 2:
-      set_hl(n);
+      set_hl(word);
       break;
     case 3:
-      set_af(n);
+      set_af(word);
       break;
     default:
       assert(false);
@@ -288,17 +298,167 @@ void Cpu::pop(const Opcode& opcode) {
 }
 
 // 11101010
-void Cpu::load_n16_a() {}
+// cycles = 16
+void Cpu::load_n16_a() {
+  u16 addr = fetchWord();
+  writeMemory(addr, get_a());
+}
 
 // 11111010
-void Cpu::load_a_n16() {}
+// cycles = 16
+void Cpu::load_a_n16() {
+  u16 addr = fetchWord();
+  set_a(readMemory(addr));
+}
+
+// 10000xxx
+void Cpu::add_a_r(const Opcode& opcode) {
+  u8 r = opcode.slice(0, 2);
+  alu->add_n(readHalfRegister(r));
+}
+
+// 10001xxx
+void Cpu::addc_a_r(const Opcode& opcode) {
+  u8 r = opcode.slice(0, 2);
+  alu->addc_n(readHalfRegister(r), get_c());
+}
+
+// 10010xxx
+void Cpu::sub_a_r(const Opcode& opcode) {
+  u8 r = opcode.slice(0, 2);
+  alu->sub_n(readHalfRegister(r));
+}
+
+// 10011xxx
+void Cpu::subc_a_r(const Opcode& opcode) {
+  u8 r = opcode.slice(0, 2);
+  alu->subc_n(readHalfRegister(r), get_c());
+}
+
+// 10100xxx
+void Cpu::and_a_r(const Opcode& opcode) {
+  u8 r = opcode.slice(0, 2);
+  alu->and_n(readHalfRegister(r));
+}
+
+// 10110xxx
+void Cpu::or_a_r(const Opcode& opcode) {
+  u8 r = opcode.slice(0, 2);
+  alu->or_n(readHalfRegister(r));
+}
+
+// 10101xxx
+void Cpu::xor_a_r(const Opcode& opcode) {
+  u8 r = opcode.slice(0, 2);
+  alu->xor_n(readHalfRegister(r));
+}
+
+// 10111xxx
+void Cpu::cp_a_r(const Opcode& opcode) {
+  u8 r = opcode.slice(0, 2);
+  alu->cp_n(readHalfRegister(r));
+}
+
+// 00xxx100
+void Cpu::inc_r8(const Opcode& opcode) {
+  u8 r = opcode.slice(3, 5);
+  u8 n = readHalfRegister(r);
+  // Setting flags here because INC (HL) is difficult to handle inside Alu.
+  set_hcy((n & 0xf) == 0xf);
+  set_z(n + 1 == 0);
+  set_n(false);
+  writeHalfRegister(r, n + 1);
+}
+
+// 00xxx101
+void Cpu::dec_r8(const Opcode& opcode) {
+  u8 r = opcode.slice(3, 5);
+  u8 n = readHalfRegister(r);
+  set_hcy((n & 0xf) < 1);
+  set_z(n - 1 == 0);
+  set_n(false);
+  writeHalfRegister(r, n - 1);
+}
+
+// 00xx1111
+void Cpu::add_hl_r(const Opcode& opcode) {
+  u8 r = opcode.slice(4, 5);
+  switch (r) {
+    case 0:
+      alu->add_hl_n16(hl, get_bc());
+      break;
+    case 1:
+      alu->add_hl_n16(hl, get_de());
+      break;
+    case 2:
+      alu->add_hl_n16(hl, get_hl());
+      break;
+    case 3:
+      alu->add_hl_n16(hl, get_hl());
+      break;
+    default:
+      break;
+  }
+  stalls += 4;
+}
+
+// 11101000
+void Cpu::add_sp_n() {
+  u8 n = fetch();
+  alu->add_sp_n8(sp, n);
+  stalls += 8;
+}
+
+// 00xx0011
+void Cpu::inc_r16(const Opcode& opcode) {
+  u8 r = opcode.slice(4, 5);
+  switch (r) {
+    case 0:
+      alu->inc16(bc);
+      break;
+    case 1:
+      alu->inc16(de);
+      break;
+    case 2:
+      alu->inc16(hl);
+      break;
+    case 3:
+      alu->inc16(sp);
+      break;
+    default:
+      assert(false);
+      break;
+  }
+}
+
+// 00xx1011
+void Cpu::dec_r16(const Opcode& opcode) {
+  u8 r = opcode.slice(4, 5);
+  switch (r) {
+    case 0:
+      alu->dec16(bc);
+      break;
+    case 1:
+      alu->dec16(de);
+      break;
+    case 2:
+      alu->dec16(hl);
+      break;
+    case 3:
+      alu->dec16(sp);
+      break;
+    default:
+      assert(false);
+      break;
+  }
+}
 
 void Cpu::halt() {
   fprintf(stderr, "halt not implemented.\n");
   return;
 }
 
-u8 Cpu::getRegister(u8 r) {
+u8 Cpu::readHalfRegister(u8 r) {
   switch (r) {
     case 0:
       return get_b();
@@ -322,7 +482,7 @@ u8 Cpu::getRegister(u8 r) {
   }
 }
 
-void Cpu::setRegister(u8 r, u8 n) {
+void Cpu::writeHalfRegister(u8 r, u8 n) {
   switch (r) {
     case 0:
       set_b(n);
@@ -364,16 +524,23 @@ void Cpu::writeMemory(u16 addr, u8 value) {
   bus->write(addr, value);
 }
 
-bool Cpu::isCarrySetAdd8(u8 n1, u8 n2) {
-  u16 n = static_cast<u16>(n1) + n2;
-  return n > 0xff;
+u16 Cpu::readWord(u16 addr) {
+  u8 low = readMemory(addr);
+  u8 high = readMemory(addr + 1);
+  return concat(high, low);
 }
 
-bool Cpu::isCarrySetAdd4(u8 n1, u8 n2) {
-  n1 &= 0x0f;
-  n2 &= 0x0f;
-  u8 n = n1 + n2;
-  return n > 0x0f;
+void Cpu::writeWord(u16 addr, u16 value) {
+  u8 high = value >> 8;
+  u8 low = (value & 0xff);
+  writeMemory(addr, low);
+  writeMemory(addr + 1, high);
+}
+
+u16 Cpu::fetchWord() {
+  u8 low = fetch();
+  u8 high = fetch();
+  return concat(high, low);
 }
 
 }  // namespace gbemu

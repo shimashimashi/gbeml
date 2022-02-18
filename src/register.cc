@@ -4,26 +4,13 @@
 
 namespace gbemu {
 
-u16 Register::get() { return value; }
+u8 HalfRegister::get() { return value; }
 
-u8 Register::getLow() { return value & 0xff; }
+bool HalfRegister::getAt(u8 i) { return value >> i & 1; }
 
-u8 Register::getHigh() { return value >> 8; }
+void HalfRegister::set(u8 n) { value = n; }
 
-bool Register::getAt(u8 i) { return (value >> i & 1) == 1; }
-
-void Register::set(u16 n) { value = n; }
-
-void Register::setLow(u8 n) { value = (value & 0xff00) | n; }
-
-void Register::setHigh(u8 n) {
-  u16 h = n;
-  h <<= 8;
-  u16 l = value & 0x00ff;
-  value = h + l;
-}
-
-void Register::setAt(u8 i, bool b) {
+void HalfRegister::setAt(u8 i, bool b) {
   u8 n = 1;
   n <<= i;
   if (b) {
@@ -33,8 +20,19 @@ void Register::setAt(u8 i, bool b) {
   }
 }
 
-void Register::increment() { value++; }
+void HalfRegister::increment() { set(get() + 1); }
 
-void Register::decrement() { value--; }
+void HalfRegister::decrement() { set(get() - 1); }
+
+u16 Register::get() { return concat(high->get(), low->get()); }
+
+void Register::set(u16 n) {
+  high->set(n >> 8);
+  low->set(n & 0xff);
+}
+
+void Register::increment() { set(get() + 1); }
+
+void Register::decrement() { set(get() - 1); }
 
 }  // namespace gbemu

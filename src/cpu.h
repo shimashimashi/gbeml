@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "alu.h"
 #include "bus.h"
 #include "opcode.h"
 #include "register.h"
@@ -13,19 +14,34 @@ namespace gbemu {
 class Cpu {
  public:
   Cpu(Bus* bus_) : bus(bus_) {
-    af = new Register();
-    bc = new Register();
-    de = new Register();
-    hl = new Register();
-    pc = new Register();
-    sp = new Register();
+    a = new HalfRegister();
+    f = new HalfRegister();
+    b = new HalfRegister();
+    c = new HalfRegister();
+    d = new HalfRegister();
+    e = new HalfRegister();
+    h = new HalfRegister();
+    l = new HalfRegister();
+    pc1 = new HalfRegister();
+    pc2 = new HalfRegister();
+    sp1 = new HalfRegister();
+    sp2 = new HalfRegister();
+
+    af = new Register(a, f);
+    bc = new Register(b, c);
+    de = new Register(d, e);
+    hl = new Register(h, l);
+    pc = new Register(pc1, pc2);
+    sp = new Register(sp1, sp2);
+
+    alu = new Alu(a, f);
   }
 
   void tick();
 
  private:
   Bus* bus;
-  u64 stalls = 0;
+  Alu* alu;
 
   Register* af;
   Register* bc;
@@ -33,6 +49,19 @@ class Cpu {
   Register* hl;
   Register* pc;
   Register* sp;
+
+  HalfRegister* a;
+  HalfRegister* f;
+  HalfRegister* b;
+  HalfRegister* c;
+  HalfRegister* d;
+  HalfRegister* e;
+  HalfRegister* h;
+  HalfRegister* l;
+  HalfRegister* pc1;
+  HalfRegister* pc2;
+  HalfRegister* sp1;
+  HalfRegister* sp2;
 
   u16 get_af();
   u16 get_bc();
@@ -55,11 +84,6 @@ class Cpu {
   u8 get_h();
   u8 get_l();
 
-  bool get_z();
-  bool get_n();
-  bool get_hcy();
-  bool get_cy();
-
   void set_a(u8 n);
   void set_f(u8 n);
   void set_b(u8 n);
@@ -75,6 +99,8 @@ class Cpu {
   void set_cy(bool b);
 
   u8 fetch();
+  u16 fetchWord();
+
   void execute(const Opcode& opcode);
 
   // 00xxx110
@@ -109,17 +135,47 @@ class Cpu {
   void load_n16_a();
   // 11111010
   void load_a_n16();
+  // 10000xxx
+  void add_a_r(const Opcode& opcode);
+  // 10001xxx
+  void addc_a_r(const Opcode& opcode);
+  // 10010xxx
+  void sub_a_r(const Opcode& opcode);
+  // 10011xxx
+  void subc_a_r(const Opcode& opcode);
+  // 10100xxx
+  void and_a_r(const Opcode& opcode);
+  // 10110xxx
+  void or_a_r(const Opcode& opcode);
+  // 10101xxx
+  void xor_a_r(const Opcode& opcode);
+  // 10111xxx
+  void cp_a_r(const Opcode& opcode);
+  // 00xxx100
+  void inc_r8(const Opcode& opcode);
+  // 00xxx101
+  void dec_r8(const Opcode& opcode);
+  // 00xx1001
+  void add_hl_r(const Opcode& opcode);
+  // 11101000
+  void add_sp_n();
+  // 00xx0011
+  void inc_r16(const Opcode& opcode);
+  // 00xx1011
+  void dec_r16(const Opcode& opcode);
   // 01110110
   void halt();
 
-  u8 getRegister(u8 r);
-  void setRegister(u8 r, u8 n);
+  u8 readHalfRegister(u8 r);
+  void writeHalfRegister(u8 r, u8 n);
 
   u8 readMemory(u16 addr);
   void writeMemory(u16 addr, u8 value);
 
-  bool isCarrySetAdd8(u8 n1, u8 n2);
-  bool isCarrySetAdd4(u8 n1, u8 n2);
+  u16 readWord(u16 addr);
+  void writeWord(u16 addr, u16 value);
+
+  u64 stalls = 0;
 };
 
 }  // namespace gbemu
