@@ -1,4 +1,4 @@
-#include "mbc.h"
+#include "memory/mbc.h"
 
 #include <cassert>
 #include <cstdio>

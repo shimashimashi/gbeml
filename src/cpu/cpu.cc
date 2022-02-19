@@ -1,19 +1,8 @@
-#include "cpu.h"
+#include "cpu/cpu.h"
 
 #include <cstdio>
 
 namespace gbemu {
-
-void Cpu::tick() {
-  if (stalls > 0) {
-    stalls--;
-    return;
-  }
-
-  u8 byte = fetch();
-  Opcode* opcode = new Opcode(byte);
-  execute(*opcode);
-}
 
 u16 Cpu::get_af() { return af->get(); }
 u16 Cpu::get_bc() { return bc->get(); }
@@ -45,10 +34,16 @@ void Cpu::set_e(u8 n) { e->set(n); }
 void Cpu::set_h(u8 n) { h->set(n); }
 void Cpu::set_l(u8 n) { l->set(n); }
 
-void Cpu::set_z(bool i) { f->setAt(3, i); }
-void Cpu::set_n(bool i) { f->setAt(2, i); }
-void Cpu::set_hcy(bool i) { f->setAt(1, i); }
-void Cpu::set_cy(bool i) { f->setAt(0, i); }
+void Cpu::tick() {
+  if (stalls > 0) {
+    stalls--;
+    return;
+  }
+
+  u8 byte = fetch();
+  Opcode* opcode = new Opcode(byte);
+  execute(*opcode);
+}
 
 u8 Cpu::fetch() {
   u8 value = readMemory(pc->get());
@@ -57,20 +52,50 @@ u8 Cpu::fetch() {
 }
 
 void Cpu::execute(const Opcode& opcode) {
-  if (opcode.match("00001000")) {
-    load_n16_sp();
+  if (opcode.match("00000000")) {
+    nop();
   } else if (opcode.match("00xx0001")) {
     load_r_n16(opcode);
   } else if (opcode.match("00xx0010")) {
     load_r_a(opcode);
   } else if (opcode.match("00xx0011")) {
     inc_r16(opcode);
-  } else if (opcode.match("00xx1001")) {
-    add_hl_r(opcode);
-  } else if (opcode.match("00xx1011")) {
-    dec_r16(opcode);
+  } else if (opcode.match("00xxx100")) {
+    inc_r8(opcode);
+  } else if (opcode.match("00xxx101")) {
+    dec_r8(opcode);
   } else if (opcode.match("00xxx110")) {
     load_r_n8(opcode);
+  } else if (opcode.match("00000111")) {
+    rlca();
+  } else if (opcode.match("00001000")) {
+    load_n16_sp();
+  } else if (opcode.match("00xx1001")) {
+    add_hl_r(opcode);
+  } else if (opcode.match("00xx1010")) {
+    load_a_r(opcode);
+  } else if (opcode.match("00xx1011")) {
+    dec_r16(opcode);
+  } else if (opcode.match("00001111")) {
+    rrca();
+  } else if (opcode.match("00010000")) {
+    stop();
+  } else if (opcode.match("00010111")) {
+    rla();
+  } else if (opcode.match("00011000")) {
+    jr_n();
+  } else if (opcode.match("00011111")) {
+    rra();
+  } else if (opcode.match("001xx000")) {
+    jr_cc_n();
+  } else if (opcode.match("00100111")) {
+    daa();
+  } else if (opcode.match("00101111")) {
+    cpl();
+  } else if (opcode.match("00110111")) {
+    scf();
+  } else if (opcode.match("00111111")) {
+    ccf();
   } else if (opcode.match("01110110")) {
     halt();
   } else if (opcode.match("01xxxyyy")) {
@@ -91,29 +116,94 @@ void Cpu::execute(const Opcode& opcode) {
     or_a_r(opcode);
   } else if (opcode.match("10111xxx")) {
     cp_a_r(opcode);
-  } else if (opcode.match("00xxx100")) {
-    inc_r8(opcode);
-  } else if (opcode.match("00xxx101")) {
-    dec_r8(opcode);
-  } else if (opcode.match("11100010")) {
-    load_c_a();
+  } else if (opcode.match("110xx000")) {
+    ret_cc();
+  } else if (opcode.match("11xx0001")) {
+    pop(opcode);
+  } else if (opcode.match("110xx010")) {
+    jp_cc_n16();
+  } else if (opcode.match("11000011")) {
+    jp_n16();
+  } else if (opcode.match("11001011")) {
+    Opcode* next = new Opcode(fetch());
+    execute_cb(*next);
+  } else if (opcode.match("110xx100")) {
+    call_cc_n16();
+  } else if (opcode.match("11xx0101")) {
+    push(opcode);
+  } else if (opcode.match("11000110")) {
+    add_a_n();
+  } else if (opcode.match("11xxx111")) {
+    rst_n();
+  } else if (opcode.match("11001001")) {
+    ret();
+  } else if (opcode.match("11001101")) {
+    call_n16();
+  } else if (opcode.match("11001110")) {
+    addc_a_n();
+  } else if (opcode.match("11010110")) {
+    sub_a_n();
+  } else if (opcode.match("11011001")) {
+    reti();
+  } else if (opcode.match("11011110")) {
+    subc_a_n();
   } else if (opcode.match("11100000")) {
     load_n_a();
+  } else if (opcode.match("11100010")) {
+    load_c_a();
+  } else if (opcode.match("11000110")) {
+    and_a_n();
   } else if (opcode.match("11101000")) {
     add_sp_n();
+  } else if (opcode.match("11101001")) {
+    jp_hl();
+  } else if (opcode.match("11101110")) {
+    xor_a_n();
   } else if (opcode.match("11110000")) {
     load_a_n();
   } else if (opcode.match("11110010")) {
     load_a_c();
+  } else if (opcode.match("11110011")) {
+    di();
+  } else if (opcode.match("11110110")) {
+    or_a_n();
   } else if (opcode.match("11111000")) {
     load_hl_sp_n8();
   } else if (opcode.match("11111001")) {
     load_sp_hl();
-  } else if (opcode.match("11xx0101")) {
-    push(opcode);
-  } else if (opcode.match("11xx0001")) {
-    pop(opcode);
+  } else if (opcode.match("11111011")) {
+    ei();
   } else {
+    assert(false);
+    fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
+  }
+}
+
+void Cpu::execute_cb(const Opcode& opcode) {
+  if (opcode.match("00000xxx")) {
+    rlc_n(opcode);
+  } else if (opcode.match("00001xxx")) {
+    rrc_n(opcode);
+  } else if (opcode.match("00010xxx")) {
+    rl_n(opcode);
+  } else if (opcode.match("00011xxx")) {
+    rr_n(opcode);
+  } else if (opcode.match("00100xxx")) {
+    sla_n(opcode);
+  } else if (opcode.match("00101xxx")) {
+    sra_n(opcode);
+  } else if (opcode.match("00110xxx")) {
+    swap(opcode);
+  } else if (opcode.match("00111xxx")) {
+    srl_n(opcode);
+  } else if (opcode.match("01xxxyyy")) {
+    bit_b_r(opcode);
+  } else if (opcode.match("10000xxx")) {
+    res_b_r(opcode);
+  } else if (opcode.match("11000xxx")) {
+    set_b_r(opcode);
+  } else {
+    assert(false);
     fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
   }
 }
@@ -121,15 +211,15 @@ void Cpu::execute(const Opcode& opcode) {
 void Cpu::load_r_n8(const Opcode& opcode) {
   u8 r = opcode.slice(3, 5);
   u8 n = fetch();
-  writeHalfRegister(r, n);
+  writeRegister(r, n);
 }
 
 // 01xxxyyy
 void Cpu::load_r_r(const Opcode& opcode) {
   u8 r1 = opcode.slice(3, 5);
   u8 r2 = opcode.slice(0, 2);
-  u8 n = readHalfRegister(r2);
-  writeHalfRegister(r1, n);
+  u8 n = readRegister(r2);
+  writeRegister(r1, n);
 }
 
 // 00xx0010
@@ -314,73 +404,104 @@ void Cpu::load_a_n16() {
 // 10000xxx
 void Cpu::add_a_r(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  alu->add_n(readHalfRegister(r));
+  alu->add_n(readRegister(r));
+}
+
+// 11000110
+void Cpu::add_a_n() {
+  u8 n = fetch();
+  alu->add_n(n);
 }
 
 // 10001xxx
 void Cpu::addc_a_r(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  alu->addc_n(readHalfRegister(r), get_c());
+  alu->addc_n(readRegister(r), get_c());
 }
 
 // 10010xxx
 void Cpu::sub_a_r(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  alu->sub_n(readHalfRegister(r));
+  alu->sub_n(readRegister(r));
 }
 
 // 10011xxx
 void Cpu::subc_a_r(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  alu->subc_n(readHalfRegister(r), get_c());
+  alu->subc_n(readRegister(r), get_c());
+}
+
+// 11010110
+void Cpu::sub_a_n() {
+  u8 n = fetch();
+  alu->sub_n(n);
+}
+
+// 11100110
+void Cpu::and_a_n() {
+  u8 n = fetch();
+  alu->and_n(n);
 }
 
 // 10100xxx
 void Cpu::and_a_r(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  alu->and_n(readHalfRegister(r));
+  alu->and_n(readRegister(r));
 }
 
 // 10110xxx
 void Cpu::or_a_r(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  alu->or_n(readHalfRegister(r));
+  alu->or_n(readRegister(r));
+}
+
+// 11110110
+void Cpu::or_a_n() {
+  u8 n = fetch();
+  alu->or_n(n);
 }
 
 // 10101xxx
 void Cpu::xor_a_r(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  alu->xor_n(readHalfRegister(r));
+  alu->xor_n(readRegister(r));
+}
+
+// 11101110
+void Cpu::xor_a_n() {
+  u8 n = fetch();
+  alu->xor_n(n);
 }
 
 // 10111xxx
 void Cpu::cp_a_r(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  alu->cp_n(readHalfRegister(r));
+  alu->cp_n(readRegister(r));
 }
 
 // 00xxx100
 void Cpu::inc_r8(const Opcode& opcode) {
   u8 r = opcode.slice(3, 5);
-  u8 n = readHalfRegister(r);
-  // Setting flags here because INC (HL) is difficult to handle inside Alu.
-  set_hcy((n & 0xf) == 0xf);
-  set_z(n + 1 == 0);
-  set_n(false);
-  writeHalfRegister(r, n + 1);
+  if (r == 6) {
+    alu->inc_memory(get_hl(), bus);
+    stalls += 8;
+  } else {
+    alu->inc_r(selectRegister(r));
+  }
 }
 
 // 00xxx101
 void Cpu::dec_r8(const Opcode& opcode) {
   u8 r = opcode.slice(3, 5);
-  u8 n = readHalfRegister(r);
-  set_hcy((n & 0xf) < 1);
-  set_z(n - 1 == 0);
-  set_n(false);
-  writeHalfRegister(r, n - 1);
+  if (r == 6) {
+    alu->dec_memory(get_hl(), bus);
+    stalls += 8;
+  } else {
+    alu->dec_r(selectRegister(r));
+  }
 }
 
-// 00xx1111
+// 00xx1001
 void Cpu::add_hl_r(const Opcode& opcode) {
   u8 r = opcode.slice(4, 5);
   switch (r) {
@@ -394,7 +515,7 @@ void Cpu::add_hl_r(const Opcode& opcode) {
       alu->add_hl_n16(hl, get_hl());
       break;
     case 3:
-      alu->add_hl_n16(hl, get_hl());
+      alu->add_hl_n16(hl, get_sp());
       break;
     default:
       break;
@@ -414,16 +535,16 @@ void Cpu::inc_r16(const Opcode& opcode) {
   u8 r = opcode.slice(4, 5);
   switch (r) {
     case 0:
-      alu->inc16(bc);
+      bc->increment();
       break;
     case 1:
-      alu->inc16(de);
+      de->increment();
       break;
     case 2:
-      alu->inc16(hl);
+      hl->increment();
       break;
     case 3:
-      alu->inc16(sp);
+      sp->increment();
       break;
     default:
       assert(false);
@@ -436,16 +557,16 @@ void Cpu::dec_r16(const Opcode& opcode) {
   u8 r = opcode.slice(4, 5);
   switch (r) {
     case 0:
-      alu->dec16(bc);
+      bc->decrement();
       break;
     case 1:
-      alu->dec16(de);
+      de->decrement();
       break;
     case 2:
-      alu->dec16(hl);
+      hl->decrement();
       break;
     case 3:
-      alu->dec16(sp);
+      sp->decrement();
       break;
     default:
       assert(false);
@@ -453,64 +574,171 @@ void Cpu::dec_r16(const Opcode& opcode) {
   }
 }
 
+// CB + 00110xxx
+void Cpu::swap(const Opcode& opcode) {
+  fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
+}
+
+// 00100111
+void Cpu::daa() {}
+
+// 00101111
+void Cpu::cpl() {}
+
+// 00111111
+void Cpu::ccf() {}
+
+// 00110111
+void Cpu::scf() {}
+
+// 00000000
+void Cpu::nop() {}
+
+// 01110110
 void Cpu::halt() {
   fprintf(stderr, "halt not implemented.\n");
   return;
 }
 
-u8 Cpu::readHalfRegister(u8 r) {
-  switch (r) {
-    case 0:
-      return get_b();
-    case 1:
-      return get_c();
-    case 2:
-      return get_d();
-    case 3:
-      return get_e();
-    case 4:
-      return get_h();
-    case 5:
-      return get_l();
-    case 6:
-      return readMemory(get_hl());
-    case 7:
-      return get_a();
-    default:
-      assert(false);
-      return 0;
+// 10 + 00000000
+void Cpu::stop() {}
+
+// 11110011
+void Cpu::di() {}
+
+// 11111011
+void Cpu::ei() {}
+
+// 00000111
+void Cpu::rlca() {}
+
+// 00010111
+void Cpu::rla() {}
+
+// 00001111
+void Cpu::rrca() {}
+
+// 00011111
+void Cpu::rra() {}
+
+// CB + 00000xxx
+void Cpu::rlc_n(const Opcode& opcode) {
+  fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
+}
+
+// CB + 00010xxx
+void Cpu::rl_n(const Opcode& opcode) {
+  fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
+}
+
+// CB + 00001xxx
+void Cpu::rrc_n(const Opcode& opcode) {
+  fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
+}
+
+// CB + 00011xxx
+void Cpu::rr_n(const Opcode& opcode) {
+  fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
+}
+
+// CB + 00100xxx
+void Cpu::sla_n(const Opcode& opcode) {
+  fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
+}
+
+// CB + 00101xxx
+void Cpu::sra_n(const Opcode& opcode) {
+  fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
+}
+
+// CB + 00111xxx
+void Cpu::srl_n(const Opcode& opcode) {
+  fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
+}
+
+// CB + 01xxxyyy
+void Cpu::bit_b_r(const Opcode& opcode) {
+  fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
+}
+
+// CB + 11000xxx
+void Cpu::set_b_r(const Opcode& opcode) {
+  fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
+}
+
+// CB + 10000xxx
+void Cpu::res_b_r(const Opcode& opcode) {
+  fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
+}
+
+// 11000011
+void Cpu::jp_n16() {}
+
+// 110xx010
+void Cpu::jp_cc_n16() {}
+
+// 11101001
+void Cpu::jp_hl() {}
+
+// 00011000
+void Cpu::jr_n() {}
+
+// 001xx000
+void Cpu::jr_cc_n() {}
+
+// 11001101
+void Cpu::call_n16() {}
+
+// 110xx100
+void Cpu::call_cc_n16() {}
+
+// 11xxx111
+void Cpu::rst_n() {}
+
+// 11001001
+void Cpu::ret() {}
+
+// 110xx000
+void Cpu::ret_cc() {}
+
+// 11011001
+void Cpu::reti() {}
+
+u8 Cpu::readRegister(u8 r) {
+  if (r == 6) {
+    return readMemory(get_hl());
+  } else {
+    return selectRegister(r)->get();
   }
 }
 
-void Cpu::writeHalfRegister(u8 r, u8 n) {
+void Cpu::writeRegister(u8 r, u8 n) {
+  if (r == 6) {
+    writeMemory(get_hl(), n);
+  } else {
+    selectRegister(r)->set(n);
+  }
+}
+
+Register* Cpu::selectRegister(u8 r) {
   switch (r) {
     case 0:
-      set_b(n);
-      break;
+      return b;
     case 1:
-      set_c(n);
-      break;
+      return c;
     case 2:
-      set_d(n);
-      break;
+      return d;
     case 3:
-      set_e(n);
-      break;
+      return e;
     case 4:
-      set_h(n);
-      break;
+      return h;
     case 5:
-      set_l(n);
-      break;
-    case 6:
-      writeMemory(get_hl(), n);
-      break;
+      return l;
     case 7:
-      set_a(n);
-      break;
+      return a;
     default:
       assert(false);
-      break;
+      return nullptr;
   }
 }
 

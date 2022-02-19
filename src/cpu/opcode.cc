@@ -1,4 +1,4 @@
-#include "opcode.h"
+#include "cpu/opcode.h"
 
 #include <cstdio>
 

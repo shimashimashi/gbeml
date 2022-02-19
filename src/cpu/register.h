@@ -5,9 +5,10 @@
 
 namespace gbemu {
 
-class HalfRegister {
+class Register {
  public:
-  HalfRegister() : value(0) {}
+  Register() : value(0) {}
+  Register(u8 value_) : value(value_) {}
 
   u8 get();
   bool getAt(u8 i);
@@ -20,18 +21,20 @@ class HalfRegister {
   u8 value;
 };
 
-class Register {
+class RegisterPair {
  public:
-  Register(HalfRegister* high_, HalfRegister* low_) : high(high_), low(low_) {}
+  RegisterPair(Register* high_, Register* low_) : high(high_), low(low_) {}
 
   u16 get();
   void set(u16 n);
+  Register* getHigh();
+  Register* getLow();
   void increment();
   void decrement();
 
  private:
-  HalfRegister* high;
-  HalfRegister* low;
+  Register* high;
+  Register* low;
 };
 
 }  // namespace gbemu

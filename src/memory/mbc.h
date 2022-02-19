@@ -3,7 +3,7 @@
 
 #include <array>
 
-#include "rom.h"
+#include "memory/rom.h"
 #include "types.h"
 
 namespace gbemu {

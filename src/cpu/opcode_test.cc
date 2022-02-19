@@ -1,4 +1,4 @@
-#include "opcode.h"
+#include "cpu/opcode.h"
 
 #include <gtest/gtest.h>
 

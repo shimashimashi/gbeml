@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "mbc.h"
-#include "rom.h"
+#include "memory/mbc.h"
+#include "memory/rom.h"
 
 int main(int argc, char* argv[]) {
   if (argc != 2) {

@@ -1,4 +1,4 @@
-#include "rom.h"
+#include "memory/rom.h"
 
 #include <cassert>
 #include <cstdio>
