@@ -37,11 +37,48 @@ class Cpu {
     alu = new Alu(af);
   }
 
+  u16 get_af();
+  u16 get_bc();
+  u16 get_de();
+  u16 get_hl();
+  u16 get_sp();
+  u16 get_pc();
+
+  u8 get_a();
+  u8 get_f();
+  u8 get_b();
+  u8 get_c();
+  u8 get_d();
+  u8 get_e();
+  u8 get_h();
+  u8 get_l();
+
+  void set_af(u16 n);
+  void set_bc(u16 n);
+  void set_de(u16 n);
+  void set_hl(u16 n);
+  void set_sp(u16 n);
+  void set_pc(u16 n);
+
+  void set_a(u8 n);
+  void set_f(u8 n);
+  void set_b(u8 n);
+  void set_c(u8 n);
+  void set_d(u8 n);
+  void set_e(u8 n);
+  void set_h(u8 n);
+  void set_l(u8 n);
+
   void tick();
+
+  bool stalled();
 
  private:
   Bus* bus;
   Alu* alu;
+  bool ime;
+  u64 stalls = 0;
+  bool halted;
 
   RegisterPair* af;
   RegisterPair* bc;
@@ -62,36 +99,6 @@ class Cpu {
   Register* pc2;
   Register* sp1;
   Register* sp2;
-
-  u16 get_af();
-  u16 get_bc();
-  u16 get_de();
-  u16 get_hl();
-  u16 get_sp();
-
-  void set_af(u16 n);
-  void set_bc(u16 n);
-  void set_de(u16 n);
-  void set_hl(u16 n);
-  void set_sp(u16 n);
-
-  u8 get_a();
-  u8 get_f();
-  u8 get_b();
-  u8 get_c();
-  u8 get_d();
-  u8 get_e();
-  u8 get_h();
-  u8 get_l();
-
-  void set_a(u8 n);
-  void set_f(u8 n);
-  void set_b(u8 n);
-  void set_c(u8 n);
-  void set_d(u8 n);
-  void set_e(u8 n);
-  void set_h(u8 n);
-  void set_l(u8 n);
 
   u8 fetch();
   u16 fetchWord();
@@ -226,23 +233,23 @@ class Cpu {
   // 11000011
   void jp_n16();
   // 110xx010
-  void jp_cc_n16();
+  void jp_cc_n16(const Opcode& opcode);
   // 11101001
   void jp_hl();
   // 00011000
   void jr_n();
   // 001xx000
-  void jr_cc_n();
+  void jr_cc_n(const Opcode& opcode);
   // 11001101
   void call_n16();
   // 110xx100
-  void call_cc_n16();
+  void call_cc_n16(const Opcode& opcode);
   // 11xxx111
-  void rst_n();
+  void rst_n(const Opcode& opcode);
   // 11001001
   void ret();
   // 110xx000
-  void ret_cc();
+  void ret_cc(const Opcode& opcode);
   // 11011001
   void reti();
 
@@ -250,14 +257,14 @@ class Cpu {
   void writeRegister(u8 r, u8 n);
 
   Register* selectRegister(u8 r);
+  RegisterPair* selectBcDeHlSp(u8 r);
+  RegisterPair* selectBcDeHlAf(u8 r);
 
   u8 readMemory(u16 addr);
   void writeMemory(u16 addr, u8 value);
 
   u16 readWord(u16 addr);
   void writeWord(u16 addr, u16 value);
-
-  u64 stalls = 0;
 };
 
 }  // namespace gbemu

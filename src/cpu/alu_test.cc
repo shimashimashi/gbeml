@@ -58,7 +58,8 @@ TEST(AluTest, addc_n_addsNPlusC) {
   RegisterPair* af = new RegisterPair(a, f);
   Alu* alu = new Alu(af);
 
-  alu->addc_n(0xfe, true);
+  alu->set_c(true);
+  alu->addc_n(0xfe);
   EXPECT_EQ(0xff, alu->get_a());
 }
 
@@ -116,7 +117,8 @@ TEST(AluTest, subc_n_subtractsNPlusC) {
   RegisterPair* af = new RegisterPair(a, f);
   Alu* alu = new Alu(af);
 
-  alu->subc_n(0xfe, true);
+  alu->set_c(true);
+  alu->subc_n(0xfe);
   EXPECT_EQ(0, alu->get_a());
 }
 
