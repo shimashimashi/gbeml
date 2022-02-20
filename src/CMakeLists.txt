@@ -60,7 +60,7 @@ gtest_discover_tests(gbemu_test)
 add_custom_target(
     clean_gcda
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMAND find . -name "*.gcda" -print0 | xargs -0 rm
+    COMMAND find . -name "*.gcda" -depth -delete
 )
 
 add_custom_target(
