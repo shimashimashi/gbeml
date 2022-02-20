@@ -35,8 +35,7 @@ void Rom::load(const std::string &filename) {
 
 bool Rom::isValid() {
   if (data.size() != rom_size) {
-    fprintf(stderr,
-            "Cartridge size is invalid. actual = %zu, expected = %llu.\n",
+    fprintf(stderr, "Cartridge size is invalid. actual = %zu, expected = %u.\n",
             data.size(), rom_size);
     return false;
   }
@@ -154,7 +153,7 @@ void Rom::setRomSize(u8 code) {
       assert(false);
   }
 
-  rom_size = (1 << 14) * num_banks;
+  rom_size = 16 * 1024 * num_banks;
 }
 
 void Rom::setRamSize(u8 code) {
@@ -181,7 +180,7 @@ void Rom::setRamSize(u8 code) {
       break;
   }
 
-  ram_size = (1 << 13) * num_banks;
+  ram_size = 8 * 1024 * num_banks;
 }
 
 void Rom::setCartridgeType(u8 code) {

@@ -24,8 +24,8 @@ class Rom {
   u8 new_licensee_code[2];
   u8 sgb_flag;
   CartridgeType cartridgeType;
-  u64 rom_size;
-  u64 ram_size;
+  u32 rom_size;
+  u32 ram_size;
   u8 destination_code;
   u8 old_licensee_code;
   u8 mask_rom_version_number;
