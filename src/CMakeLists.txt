@@ -18,7 +18,8 @@ add_library(
 )
 target_compile_options(
     gbemu_core PRIVATE
-    -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded
+    # -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded
+    -Werror -Wall -Wextra
     --coverage
 )
 target_link_options(
