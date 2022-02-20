@@ -94,9 +94,9 @@ TEST(AluTest, sub_n_setsHIfNoBorrowBit4) {
   Alu* alu = new Alu(af);
 
   alu->sub_n(0xf);
-  EXPECT_EQ(true, alu->get_h());
-  alu->sub_n(1);
   EXPECT_EQ(false, alu->get_h());
+  alu->sub_n(1);
+  EXPECT_EQ(true, alu->get_h());
 }
 
 TEST(AluTest, sub_n_setsCIfNoBorrow) {
@@ -106,9 +106,9 @@ TEST(AluTest, sub_n_setsCIfNoBorrow) {
   Alu* alu = new Alu(af);
 
   alu->sub_n(1);
-  EXPECT_EQ(false, alu->get_c());
-  alu->sub_n(0xff);
   EXPECT_EQ(true, alu->get_c());
+  alu->sub_n(0xff);
+  EXPECT_EQ(false, alu->get_c());
 }
 
 TEST(AluTest, subc_n_subtractsNPlusC) {

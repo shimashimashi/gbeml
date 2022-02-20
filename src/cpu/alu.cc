@@ -63,8 +63,8 @@ void Alu::xor_n(u8 n) {
 
 void Alu::cp_n(u8 n) {
   u8 a = get_a();
-  set_c(a < n);
-  set_h((a & 0xf) < (n & 0xf));
+  set_c(a >= n);
+  set_h((a & 0xf) >= (n & 0xf));
   set_z(a - n == 0);
   set_n(true);
 }

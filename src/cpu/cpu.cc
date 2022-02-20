@@ -26,6 +26,8 @@ u8 Cpu::get_d() { return d->get(); }
 u8 Cpu::get_e() { return e->get(); }
 u8 Cpu::get_h() { return h->get(); }
 u8 Cpu::get_l() { return l->get(); }
+bool Cpu::get_carry() { return alu->get_c(); }
+bool Cpu::get_z() { return alu->get_z(); }
 
 void Cpu::set_a(u8 n) { a->set(n); }
 void Cpu::set_f(u8 n) { f->set(n); }
@@ -35,6 +37,8 @@ void Cpu::set_d(u8 n) { d->set(n); }
 void Cpu::set_e(u8 n) { e->set(n); }
 void Cpu::set_h(u8 n) { h->set(n); }
 void Cpu::set_l(u8 n) { l->set(n); }
+void Cpu::set_carry(bool flag) { alu->set_c(flag); }
+void Cpu::set_z(bool flag) { alu->set_z(flag); }
 
 void Cpu::tick() {
   if (stalled()) {
@@ -331,20 +335,14 @@ void Cpu::load_n16_sp() {
 void Cpu::push(const Opcode& opcode) {
   u8 r = opcode.slice(4, 5);
   u16 word = selectBcDeHlAf(r)->get();
-
-  sp->decrement();
-  sp->decrement();
-  writeWord(get_sp(), word);
+  pushStack(word);
   stalls += 4;
 }
 
 // 11xx0001
 // cycles = 12
 void Cpu::pop(const Opcode& opcode) {
-  u16 word = readWord(get_sp());
-  sp->increment();
-  sp->increment();
-
+  u16 word = popStack();
   u8 r = opcode.slice(4, 5);
   selectBcDeHlAf(r)->set(word);
 }
@@ -658,31 +656,9 @@ void Cpu::jp_n16() {
 // 110xx010
 void Cpu::jp_cc_n16(const Opcode& opcode) {
   u16 addr = fetchWord();
-
   u8 n = opcode.slice(3, 4);
-  switch (n) {
-    case 0:
-      if (!alu->get_z()) {
-        set_pc(addr);
-      }
-      break;
-    case 1:
-      if (alu->get_z()) {
-        set_pc(addr);
-      }
-      break;
-    case 2:
-      if (!alu->get_c()) {
-        set_pc(addr);
-      }
-      break;
-    case 3:
-      if (alu->get_c()) {
-        set_pc(addr);
-      }
-      break;
-    default:
-      break;
+  if (checkFlags(n)) {
+    set_pc(addr);
   }
 }
 
@@ -691,87 +667,43 @@ void Cpu::jp_hl() { set_pc(get_hl()); }
 
 // 00011000
 void Cpu::jr_n() {
-  u16 addr = get_pc() + fetch();
-  set_pc(addr);
+  u8 offset = fetch();
+  jumpRelative(offset);
 }
 
 // 001xx000
 void Cpu::jr_cc_n(const Opcode& opcode) {
-  u16 addr = get_pc() + fetch();
-
+  u8 offset = fetch();
   u8 n = opcode.slice(3, 4);
-  switch (n) {
-    case 0:
-      if (!alu->get_z()) {
-        set_pc(addr);
-      }
-      break;
-    case 1:
-      if (alu->get_z()) {
-        set_pc(addr);
-      }
-      break;
-    case 2:
-      if (!alu->get_c()) {
-        set_pc(addr);
-      }
-      break;
-    case 3:
-      if (alu->get_c()) {
-        set_pc(addr);
-      }
-      break;
-    default:
-      break;
+  if (checkFlags(n)) {
+    jumpRelative(offset);
   }
 }
 
 // 11001101
 // cycles = 12
 void Cpu::call_n16() {
-  sp->decrement();
-  sp->decrement();
-  writeWord(get_sp(), get_pc() + 1);
-  set_pc(fetchWord());
+  u16 addr = fetchWord();
+  call(addr);
   stalls -= 8;
 }
 
 // 110xx100
 // cycles = 12
 void Cpu::call_cc_n16(const Opcode& opcode) {
+  u16 addr = fetchWord();
   u8 n = opcode.slice(3, 4);
-  switch (n) {
-    case 0:
-      if (!alu->get_z()) {
-        call_n16();
-      }
-      break;
-    case 1:
-      if (alu->get_z()) {
-        call_n16();
-      }
-      break;
-    case 2:
-      if (!alu->get_c()) {
-        call_n16();
-      }
-      break;
-    case 3:
-      if (alu->get_c()) {
-        call_n16();
-      }
-      break;
-    default:
-      break;
+  if (checkFlags(n)) {
+    call(addr);
   }
+  // not sure
+  stalls -= 8;
 }
 
 // 11xxx111
 // cycles = 32
 void Cpu::rst_n(const Opcode& opcode) {
-  sp->decrement();
-  sp->decrement();
-  writeWord(get_sp(), get_pc());
+  pushStack(get_pc());
 
   u8 addr = 0;
   u8 n = opcode.slice(3, 5);
@@ -809,11 +741,9 @@ void Cpu::rst_n(const Opcode& opcode) {
 }
 
 // 11001001
+// cycles = 8
 void Cpu::ret() {
-  u16 addr = readWord(get_sp());
-  sp->increment();
-  sp->increment();
-
+  u16 addr = popStack();
   set_pc(addr);
   stalls -= 4;
 }
@@ -821,29 +751,8 @@ void Cpu::ret() {
 // 110xx000
 void Cpu::ret_cc(const Opcode& opcode) {
   u8 n = opcode.slice(3, 4);
-  switch (n) {
-    case 0:
-      if (!alu->get_z()) {
-        ret();
-      }
-      break;
-    case 1:
-      if (alu->get_z()) {
-        ret();
-      }
-      break;
-    case 2:
-      if (!alu->get_c()) {
-        ret();
-      }
-      break;
-    case 3:
-      if (alu->get_c()) {
-        ret();
-      }
-      break;
-    default:
-      break;
+  if (checkFlags(n)) {
+    ret();
   }
 }
 
@@ -950,6 +859,44 @@ u16 Cpu::fetchWord() {
   u8 low = fetch();
   u8 high = fetch();
   return concat(high, low);
+}
+
+void Cpu::jumpRelative(u8 offset) {
+  set_pc(static_cast<u16>(get_pc() + static_cast<i8>(offset)));
+}
+
+bool Cpu::checkFlags(u8 n) {
+  switch (n) {
+    case 0:
+      return !alu->get_z();
+    case 1:
+      return alu->get_z();
+    case 2:
+      return !alu->get_c();
+    case 3:
+      return alu->get_c();
+    default:
+      assert(false);
+      return false;
+  }
+}
+
+void Cpu::pushStack(u16 word) {
+  sp->decrement();
+  sp->decrement();
+  writeWord(get_sp(), word);
+}
+
+u16 Cpu::popStack() {
+  u16 word = readWord(get_sp());
+  sp->increment();
+  sp->increment();
+  return word;
+}
+
+void Cpu::call(u16 addr) {
+  pushStack(get_pc());
+  set_pc(addr);
 }
 
 }  // namespace gbemu

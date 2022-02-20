@@ -53,6 +53,9 @@ class Cpu {
   u8 get_h();
   u8 get_l();
 
+  bool get_carry();
+  bool get_z();
+
   void set_af(u16 n);
   void set_bc(u16 n);
   void set_de(u16 n);
@@ -69,6 +72,9 @@ class Cpu {
   void set_h(u8 n);
   void set_l(u8 n);
 
+  void set_carry(bool flag);
+  void set_z(bool flag);
+
   void tick();
 
   bool stalled();
@@ -78,7 +84,7 @@ class Cpu {
   Alu* alu;
   bool ime;
   u64 stalls = 0;
-  bool halted;
+  bool halted = false;
 
   RegisterPair* af;
   RegisterPair* bc;
@@ -265,6 +271,15 @@ class Cpu {
 
   u16 readWord(u16 addr);
   void writeWord(u16 addr, u16 value);
+
+  void jumpRelative(u8 offset);
+
+  bool checkFlags(u8 n);
+
+  void pushStack(u16 word);
+  u16 popStack();
+
+  void call(u16 addr);
 };
 
 }  // namespace gbemu
