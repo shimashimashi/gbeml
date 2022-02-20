@@ -1,5 +1,6 @@
 #include "cpu/cpu.h"
 
+#include <cassert>
 #include <cstdio>
 
 namespace gbemu {
