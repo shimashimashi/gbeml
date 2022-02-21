@@ -1,5 +1,5 @@
-#ifndef GBEMU_BUS_H_
-#define GBEMU_BUS_H_
+#ifndef GBEMU_MMAP_H_
+#define GBEMU_MMAP_H_
 
 #include <array>
 
@@ -21,4 +21,4 @@ class Mmap : public Bus {
 
 }  // namespace gbemu
 
-#endif  // GBEMU_BUS_H_
+#endif  // GBEMU_MMAP_H_

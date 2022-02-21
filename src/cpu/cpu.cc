@@ -58,6 +58,8 @@ void Cpu::tick() {
 
 bool Cpu::stalled() { return stalls > 0; }
 
+bool Cpu::get_ime() { return ime; }
+
 u8 Cpu::fetch() {
   u8 value = readMemory(get_pc());
   pc->increment();
@@ -164,12 +166,14 @@ void Cpu::execute(const Opcode& opcode) {
     load_n_a();
   } else if (opcode.match("11100010")) {
     load_c_a();
-  } else if (opcode.match("11000110")) {
+  } else if (opcode.match("11100110")) {
     and_a_n();
   } else if (opcode.match("11101000")) {
     add_sp_n();
   } else if (opcode.match("11101001")) {
     jp_hl();
+  } else if (opcode.match("11101010")) {
+    load_n16_a();
   } else if (opcode.match("11101110")) {
     xor_a_n();
   } else if (opcode.match("11110000")) {
@@ -184,6 +188,8 @@ void Cpu::execute(const Opcode& opcode) {
     load_hl_sp_n8();
   } else if (opcode.match("11111001")) {
     load_sp_hl();
+  } else if (opcode.match("11111010")) {
+    load_a_n16();
   } else if (opcode.match("11111011")) {
     ei();
   } else {
@@ -554,6 +560,7 @@ void Cpu::rlc_n(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
   if (r == 6) {
     alu->rlc_memory(get_hl(), bus);
+    stalls += 8;
   } else {
     alu->rlc_r(selectRegister(r));
   }
@@ -564,6 +571,7 @@ void Cpu::rl_n(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
   if (r == 6) {
     alu->rl_memory(get_hl(), bus);
+    stalls += 8;
   } else {
     alu->rl_r(selectRegister(r));
   }
@@ -574,6 +582,7 @@ void Cpu::rrc_n(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
   if (r == 6) {
     alu->rrc_memory(get_hl(), bus);
+    stalls += 8;
   } else {
     alu->rrc_r(selectRegister(r));
   }
@@ -584,6 +593,7 @@ void Cpu::rr_n(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
   if (r == 6) {
     alu->rr_memory(get_hl(), bus);
+    stalls += 8;
   } else {
     alu->rr_r(selectRegister(r));
   }
@@ -594,6 +604,7 @@ void Cpu::sla_n(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
   if (r == 6) {
     alu->sla_memory(get_hl(), bus);
+    stalls += 8;
   } else {
     alu->sla_r(selectRegister(r));
   }
@@ -604,6 +615,7 @@ void Cpu::sra_n(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
   if (r == 6) {
     alu->sra_memory(get_hl(), bus);
+    stalls += 8;
   } else {
     alu->sra_r(selectRegister(r));
   }
@@ -614,6 +626,7 @@ void Cpu::srl_n(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
   if (r == 6) {
     alu->srl_memory(get_hl(), bus);
+    stalls += 8;
   } else {
     alu->srl_r(selectRegister(r));
   }
@@ -632,6 +645,7 @@ void Cpu::set_b_r(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
   if (r == 6) {
     alu->set_b_memory(i, get_hl(), bus);
+    stalls += 8;
   } else {
     alu->set_b_r(i, selectRegister(r));
   }
@@ -643,6 +657,7 @@ void Cpu::res_b_r(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
   if (r == 6) {
     alu->res_b_memory(i, get_hl(), bus);
+    stalls += 8;
   } else {
     alu->res_b_r(i, selectRegister(r));
   }

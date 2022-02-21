@@ -16,7 +16,6 @@ void Alu::set_c(bool b) { af->getLow()->setAt(4, b); }
 
 void Alu::add_n(u8 n) {
   u8 a = get_a();
-  // set_c(static_cast<u16>(a) + n > 0xff);
   set_c(a + n > 0xff);
   set_h((a & 0xf) + (n & 0xf) > 0xf);
   set_z(static_cast<u8>(a + n) == 0);
@@ -40,7 +39,7 @@ void Alu::and_n(u8 n) {
   set_h(true);
   set_z((a & n) == 0);
   set_n(false);
-  set_a(a &= n);
+  set_a(a & n);
 }
 
 void Alu::or_n(u8 n) {
@@ -49,7 +48,7 @@ void Alu::or_n(u8 n) {
   set_h(false);
   set_z((a | n) == 0);
   set_n(false);
-  set_a(a |= n);
+  set_a(a | n);
 }
 
 void Alu::xor_n(u8 n) {
@@ -58,7 +57,7 @@ void Alu::xor_n(u8 n) {
   set_h(false);
   set_z((a ^ n) == 0);
   set_n(false);
-  set_a(a ^= n);
+  set_a(a ^ n);
 }
 
 void Alu::cp_n(u8 n) {
@@ -264,7 +263,7 @@ void Alu::srl_memory(u16 addr, Bus* bus) {
 }
 
 void Alu::bit_b_r(u8 i, u8 n) {
-  set_z((n >> i) && 1 == 0);
+  set_z(((n >> i) & 1) == 0);
   set_n(false);
   set_h(true);
 }
@@ -371,13 +370,13 @@ u8 Alu::shiftRightLogical(u8 n) {
   return res;
 }
 
-u8 Alu::setBit(u8 n, u8 i) {
+u8 Alu::setBit(u8 i, u8 n) {
   u8 b = 1;
   b <<= i;
   return n | b;
 }
 
-u8 Alu::resetBit(u8 n, u8 i) {
+u8 Alu::resetBit(u8 i, u8 n) {
   u8 b = 1;
   b <<= i;
   return n & ~b;
