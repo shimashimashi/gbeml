@@ -1,7 +1,6 @@
 #include <iostream>
 
-#include "memory/mbc.h"
-#include "memory/rom.h"
+#include "gameboy.h"
 
 int main(int argc, char* argv[]) {
   if (argc != 2) {
@@ -10,21 +9,8 @@ int main(int argc, char* argv[]) {
   }
   std::string filename(argv[1]);
 
-  gbemu::Rom* rom = new gbemu::Rom();
-  rom->load(filename);
-  if (!rom->isValid()) {
-    return 1;
-  }
-
-  gbemu::Mbc* mbc;
-  switch (rom->cartridgeType) {
-    case gbemu::CartridgeType::RomOnly:
-      mbc = new gbemu::RomOnly(*rom);
-      break;
-    case gbemu::CartridgeType::Mbc1:
-      mbc = new gbemu::Mbc1(*rom);
-      break;
-  }
+  gbemu::GameBoy gb;
+  gb.init(filename);
 
   std::cout << "OK" << std::endl;
   return 0;

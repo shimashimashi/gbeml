@@ -153,7 +153,7 @@ void Rom::setRomSize(u8 code) {
       assert(false);
   }
 
-  rom_size = 16 * 1024 * num_banks;
+  rom_size = static_cast<u32>(16 * 1024 * num_banks);
 }
 
 void Rom::setRamSize(u8 code) {
@@ -180,7 +180,7 @@ void Rom::setRamSize(u8 code) {
       break;
   }
 
-  ram_size = 8 * 1024 * num_banks;
+  ram_size = static_cast<u32>(8 * 1024 * num_banks);
 }
 
 void Rom::setCartridgeType(u8 code) {

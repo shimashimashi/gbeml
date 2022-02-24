@@ -3,7 +3,8 @@
 
 #include <string>
 
-#include "types.h"
+#include "register/register.h"
+#include "types/types.h"
 
 namespace gbemu {
 
@@ -12,11 +13,11 @@ class Opcode {
   Opcode(u8 code) : value(code) {}
 
   u8 get() const;
-  bool match(std::string pattern) const;
+  bool match(const std::string& pattern) const;
   u8 slice(u8 from, u8 to) const;
 
  private:
-  u8 value;
+  Register value;
 };
 
 }  // namespace gbemu

@@ -1,9 +1,9 @@
 #ifndef GBEMU_ALU_H_
 #define GBEMU_ALU_H_
 
-#include "bus.h"
-#include "cpu/register.h"
-#include "types.h"
+#include "bus/bus.h"
+#include "register/register.h"
+#include "types/types.h"
 
 namespace gbemu {
 
@@ -69,6 +69,7 @@ class Alu {
   bool get_c();
 
   void set_a(u8 n);
+  void set_f(u8 n);
   void set_z(bool b);
   void set_n(bool b);
   void set_h(bool b);

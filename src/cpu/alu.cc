@@ -9,6 +9,7 @@ bool Alu::get_h() { return af->getLow()->getAt(5); }
 bool Alu::get_c() { return af->getLow()->getAt(4); }
 
 void Alu::set_a(u8 n) { af->getHigh()->set(n); }
+void Alu::set_f(u8 n) { af->getLow()->set(n); }
 void Alu::set_z(bool b) { af->getLow()->setAt(7, b); }
 void Alu::set_n(bool b) { af->getLow()->setAt(6, b); }
 void Alu::set_h(bool b) { af->getLow()->setAt(5, b); }

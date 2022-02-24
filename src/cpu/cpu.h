@@ -3,39 +3,19 @@
 
 #include <string>
 
-#include "bus.h"
+#include "bus/bus.h"
 #include "cpu/alu.h"
 #include "cpu/opcode.h"
-#include "cpu/register.h"
-#include "types.h"
+#include "interrupt/interrupt_controller.h"
+#include "register/register.h"
+#include "types/types.h"
 
 namespace gbemu {
 
 class Cpu {
  public:
-  Cpu(Bus* bus_) : bus(bus_) {
-    a = new Register();
-    f = new Register();
-    b = new Register();
-    c = new Register();
-    d = new Register();
-    e = new Register();
-    h = new Register();
-    l = new Register();
-    pc1 = new Register();
-    pc2 = new Register();
-    sp1 = new Register();
-    sp2 = new Register();
-
-    af = new RegisterPair(a, f);
-    bc = new RegisterPair(b, c);
-    de = new RegisterPair(d, e);
-    hl = new RegisterPair(h, l);
-    pc = new RegisterPair(pc1, pc2);
-    sp = new RegisterPair(sp1, sp2);
-
-    alu = new Alu(af);
-  }
+  Cpu(Bus* bus_, InterruptController* ic_)
+      : bus(bus_), ic(ic_), af(), bc(), de(), hl(), pc(), sp(), alu(&af) {}
 
   u16 get_af();
   u16 get_bc();
@@ -82,36 +62,28 @@ class Cpu {
 
  private:
   Bus* bus;
-  Alu* alu;
+  InterruptController* ic;
+
   bool ime;
   u64 stalls = 0;
   bool halted = false;
 
-  RegisterPair* af;
-  RegisterPair* bc;
-  RegisterPair* de;
-  RegisterPair* hl;
-  RegisterPair* pc;
-  RegisterPair* sp;
+  RegisterPair af;
+  RegisterPair bc;
+  RegisterPair de;
+  RegisterPair hl;
+  RegisterPair pc;
+  RegisterPair sp;
 
-  Register* a;
-  Register* f;
-  Register* b;
-  Register* c;
-  Register* d;
-  Register* e;
-  Register* h;
-  Register* l;
-  Register* pc1;
-  Register* pc2;
-  Register* sp1;
-  Register* sp2;
+  Alu alu;
 
   u8 fetch();
   u16 fetchWord();
 
   void execute(const Opcode& opcode);
   void execute_cb(const Opcode& opcode);
+
+  void handleInterrupt();
 
   // 00xxx110
   void load_r_n8(const Opcode& opcode);

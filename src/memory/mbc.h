@@ -4,7 +4,7 @@
 #include <array>
 
 #include "memory/rom.h"
-#include "types.h"
+#include "types/types.h"
 
 namespace gbemu {
 
