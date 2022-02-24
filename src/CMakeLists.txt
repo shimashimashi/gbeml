@@ -23,12 +23,21 @@ add_library(
     graphics/display.cc
     graphics/ppu.cc
 )
-target_compile_options(
-    gbemu_core PRIVATE
-    -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded
-    # -Werror -Wall -Wextra
-    --coverage
-)
+
+if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    target_compile_options(
+        gbemu_core PRIVATE
+        -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded
+        --coverage
+    )
+else()
+    target_compile_options(
+        gbemu_core PRIVATE
+        -Werror -Wall -Wextra
+        --coverage
+    )
+endif()
+
 target_link_options(
     gbemu_core PRIVATE
     --coverage
