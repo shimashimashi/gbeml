@@ -1,17 +1,17 @@
-#ifndef GBEMU_BUS_H_
-#define GBEMU_BUS_H_
+#ifndef GBEMU_RAM_H_
+#define GBEMU_RAM_H_
 
-#include "types.h"
+#include "types/types.h"
 
 namespace gbemu {
 
-class Bus {
+class Ram {
  public:
-  virtual ~Bus();
+  virtual ~Ram();
   virtual u8 read(u16 addr) const = 0;
   virtual void write(u16 addr, u8 value) = 0;
 };
 
 }  // namespace gbemu
 
-#endif  // GBEMU_BUS_H_
+#endif  // GBEMU_RAM_H_

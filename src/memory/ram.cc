@@ -1,7 +1,7 @@
-#include "bus.h"
+#include "memory/ram.h"
 
 namespace gbemu {
 
-Bus::~Bus() {}
+Ram::~Ram() {}
 
 }  // namespace gbemu

@@ -7,19 +7,26 @@ FetchContent_MakeAvailable(gtest)
 
 add_library(
     gbemu_core SHARED
-    bus.cc
-    types.cc
+    gameboy.cc
+    types/types.cc
+    bus/bus.cc
+    bus/bus_impl.cc
+    interrupt/interrupt_controller.cc
+    register/register.cc
     memory/mbc.cc
+    memory/ram.cc
+    memory/ram_impl.cc
     memory/rom.cc
-    cpu/cpu.cc
-    cpu/register.cc
-    cpu/opcode.cc
     cpu/alu.cc
+    cpu/cpu.cc
+    cpu/opcode.cc
+    graphics/display.cc
+    graphics/ppu.cc
 )
 target_compile_options(
     gbemu_core PRIVATE
-    # -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded
-    -Werror -Wall -Wextra
+    -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded
+    # -Werror -Wall -Wextra
     --coverage
 )
 target_link_options(
@@ -42,11 +49,11 @@ target_compile_options(
 
 add_executable(
     gbemu_test
-    types_test.cc
-    cpu/register_test.cc
-    cpu/opcode_test.cc
+    types/types_test.cc
+    register/register_test.cc
     cpu/alu_test.cc
     cpu/cpu_test.cc
+    cpu/opcode_test.cc
 )
 target_link_libraries(gbemu_test gbemu_core gtest_main gmock_main)
 target_compile_options(
