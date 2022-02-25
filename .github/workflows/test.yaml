@@ -16,7 +16,7 @@ jobs:
         submodules: true
 
     - name: Install Dependencies
-      run: sudo apt-get install libx11-dev lcov
+      run: sudo apt-get install libx11-dev libgl-dev lcov
     - name: Configure
       run: |
         cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Debug
