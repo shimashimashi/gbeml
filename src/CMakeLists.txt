@@ -56,9 +56,6 @@ target_link_libraries(gbemu gbemu_core minifb)
 target_compile_options(
     gbemu PRIVATE
 )
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(USE_METAL_API "ON")
-endif()
 
 add_executable(
     gbemu_test
