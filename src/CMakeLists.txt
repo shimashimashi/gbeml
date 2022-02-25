@@ -34,7 +34,7 @@ if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 else()
     target_compile_options(
         gbemu_core PRIVATE
-        -Werror -Wall -Wextra
+        -Werror -Wall -Wextra -Wno-return-type
         --coverage
     )
 endif()
