@@ -79,10 +79,11 @@ TEST(AluTest, sub_n_setsN) {
 TEST(AluTest, sub_n_setsHIfNoBorrowBit4) {
   RegisterPair af;
   Alu alu(&af);
+  alu.set_a(0xff);
 
-  alu.sub_n(0xf);
-  EXPECT_EQ(false, alu.get_h());
   alu.sub_n(1);
+  EXPECT_EQ(false, alu.get_h());
+  alu.sub_n(0xf);
   EXPECT_EQ(true, alu.get_h());
 }
 
@@ -92,9 +93,9 @@ TEST(AluTest, sub_n_setsCIfNoBorrow) {
   alu.set_a(0xff);
 
   alu.sub_n(1);
-  EXPECT_EQ(true, alu.get_c());
-  alu.sub_n(0xff);
   EXPECT_EQ(false, alu.get_c());
+  alu.sub_n(0xff);
+  EXPECT_EQ(true, alu.get_c());
 }
 
 TEST(AluTest, subc_n_subtractsNPlusC) {

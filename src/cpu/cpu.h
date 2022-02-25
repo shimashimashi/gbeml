@@ -58,7 +58,7 @@ class Cpu {
   void tick();
 
   bool stalled();
-  bool get_ime();
+  bool interruptEnabled();
 
  private:
   Bus* bus;

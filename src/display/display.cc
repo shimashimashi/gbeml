@@ -1,4 +1,4 @@
-#include "graphics/display.h"
+#include "display/display.h"
 
 namespace gbemu {
 

@@ -10,9 +10,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GH_ACCESS_TOKEN }}
+        submodules: true
 
-    - name: Install lcov
-      run: sudo apt-get install lcov
+    - name: Install Dependencies
+      run: sudo apt-get install libx11-dev libgl-dev libxkbcommon-dev lcov
     - name: Configure
       run: |
         cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Debug
