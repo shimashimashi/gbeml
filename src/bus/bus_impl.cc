@@ -7,19 +7,16 @@ namespace gbemu {
 u8 BusImpl::read(u16 addr) const {
   if (addr <= 0x7fff) {
     return mbc->read(addr);
-  } else if (addr <= 0x97ff) {
-    return ppu->readTileData(addr);
   } else if (addr <= 0x9fff) {
-    return ppu->readTileMap(addr);
+    return ppu->readVram(addr - 0x8000);
   } else if (addr <= 0xbfff) {
     return mbc->read(addr);
   } else if (addr <= 0xdfff) {
-    return wram->read(addr);
+    return wram->read(addr - 0xc000);
   } else if (addr <= 0xfdff) {
-    fprintf(stderr, "Not implemented to read %x\n", addr);
-    return 0x00;
+    return wram->read(addr - 0xf000);
   } else if (addr <= 0xfe9f) {
-    return ppu->readOam(addr);
+    return ppu->readOam(addr - 0xfe00);
   } else if (addr <= 0xfeff) {
     fprintf(stderr, "Address %x is not usable\n", addr);
     return 0x00;
@@ -53,7 +50,7 @@ u8 BusImpl::read(u16 addr) const {
     fprintf(stderr, "Not implemented to read %x\n", addr);
     return 0x00;
   } else if (addr <= 0xfffe) {
-    return hram->read(addr);
+    return hram->read(addr - 0xff80);
   } else if (addr == 0xffff) {
     return ic->readIe();
   } else {
@@ -65,18 +62,16 @@ u8 BusImpl::read(u16 addr) const {
 void BusImpl::write(u16 addr, u8 value) {
   if (addr <= 0x7fff) {
     mbc->write(addr, value);
-  } else if (addr <= 0x97ff) {
-    ppu->writeTileData(addr, value);
   } else if (addr <= 0x9fff) {
-    ppu->writeTileMap(addr, value);
+    ppu->writeVram(addr - 0x8000, value);
   } else if (addr <= 0xbfff) {
     mbc->write(addr, value);
   } else if (addr <= 0xdfff) {
-    wram->write(addr, value);
+    wram->write(addr - 0xc000, value);
   } else if (addr <= 0xfdff) {
-    fprintf(stderr, "Not implemented to write %x\n", addr);
+    wram->write(addr - 0xf000, value);
   } else if (addr <= 0xfe9f) {
-    ppu->writeOam(addr, value);
+    ppu->writeOam(addr - 0xfe00, value);
   } else if (addr <= 0xfeff) {
     fprintf(stderr, "Address %x is not usable\n", addr);
   } else if (addr == 0xff0f) {
@@ -108,7 +103,7 @@ void BusImpl::write(u16 addr, u8 value) {
   } else if (addr <= 0xff7f) {
     fprintf(stderr, "Not implemented to write %x\n", addr);
   } else if (addr <= 0xfffe) {
-    hram->write(addr, value);
+    hram->write(addr - 0xff80, value);
   } else if (addr == 0xffff) {
     ic->writeIe(value);
   } else {
@@ -139,10 +134,10 @@ void BusImpl::dma(u8 value) {
 void BusImpl::transfer() {
   u16 addr = concat(0xfe, static_cast<u8>(dma_source_address & 0xff));
   ppu->writeOam(addr, read(dma_source_address));
-  dma_source_address++;
   if ((dma_source_address & 0xff) == 0xff) {
     is_transfering = false;
   }
+  dma_source_address++;
 }
 
 }  // namespace gbemu

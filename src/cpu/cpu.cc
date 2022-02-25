@@ -46,7 +46,7 @@ void Cpu::tick() {
     return;
   }
 
-  if (ime) {
+  if (interruptEnabled()) {
     handleInterrupt();
   }
 
@@ -61,7 +61,7 @@ void Cpu::tick() {
 
 bool Cpu::stalled() { return stalls > 0; }
 
-bool Cpu::get_ime() { return ime; }
+bool Cpu::interruptEnabled() { return ime; }
 
 u8 Cpu::fetch() {
   u8 value = readMemory(get_pc());
@@ -195,9 +195,13 @@ void Cpu::execute(const Opcode& opcode) {
     load_a_n16();
   } else if (opcode.match("11111011")) {
     ei();
+  } else if (opcode.match("11111110")) {
+    cp_a_n();
   } else {
-    assert(false);
+#ifndef NDEBUG
+    // assert(false);
     fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
+#endif
   }
 }
 
@@ -241,6 +245,9 @@ void Cpu::load_r_r(const Opcode& opcode) {
   u8 r1 = opcode.slice(3, 5);
   u8 r2 = opcode.slice(0, 2);
   u8 n = readRegister(r2);
+#ifndef NDEBUG
+  fprintf(stderr, "ld r, r\n");
+#endif
   writeRegister(r1, n);
 }
 
@@ -248,16 +255,28 @@ void Cpu::load_r_r(const Opcode& opcode) {
 void Cpu::load_r_a(const Opcode& opcode) {
   switch (opcode.slice(4, 5)) {
     case 0:
+#ifndef NDEBUG
+      fprintf(stderr, "ld [bc], a\n");
+#endif
       writeMemory(get_bc(), get_a());
       break;
     case 1:
+#ifndef NDEBUG
+      fprintf(stderr, "ld [de], a\n");
+#endif
       writeMemory(get_de(), get_a());
       break;
     case 2:
+#ifndef NDEBUG
+      fprintf(stderr, "ld [hl+], a\n");
+#endif
       writeMemory(get_hl(), get_a());
       hl.increment();
       break;
     case 3:
+#ifndef NDEBUG
+      fprintf(stderr, "ld [hl-], a\n");
+#endif
       writeMemory(get_hl(), get_a());
       hl.decrement();
       break;
@@ -269,19 +288,31 @@ void Cpu::load_r_a(const Opcode& opcode) {
 
 // 00xx1010
 void Cpu::load_a_r(const Opcode& opcode) {
-  u8 value;
+  u8 value = 0;
   switch (opcode.slice(4, 5)) {
     case 0:
+#ifndef NDEBUG
+      fprintf(stderr, "ld a, [bc]\n");
+#endif
       value = readMemory(get_bc());
       break;
     case 1:
+#ifndef NDEBUG
+      fprintf(stderr, "ld a, [de]\n");
+#endif
       value = readMemory(get_de());
       break;
     case 2:
+#ifndef NDEBUG
+      fprintf(stderr, "ld a, [hl+]\n");
+#endif
       value = readMemory(get_hl());
       hl.increment();
       break;
     case 3:
+#ifndef NDEBUG
+      fprintf(stderr, "ld a, [hl-]\n");
+#endif
       value = readMemory(get_hl());
       hl.decrement();
       break;
@@ -301,12 +332,18 @@ void Cpu::load_c_a() { writeMemory(0xff00 + get_c(), get_a()); }
 // 11100000
 void Cpu::load_n_a() {
   u8 n = fetch();
+#ifndef NDEBUG
+  fprintf(stderr, "ld [0xff%x], a\n", n);
+#endif
   writeMemory(0xff00 + n, get_a());
 }
 
 // 11110000
 void Cpu::load_a_n() {
   u8 n = fetch();
+#ifndef NDEBUG
+  fprintf(stderr, "ld a, [0xff%x]\n", n);
+#endif
   set_a(readMemory(0xff00 + n));
 }
 
@@ -315,6 +352,9 @@ void Cpu::load_a_n() {
 void Cpu::load_r_n16(const Opcode& opcode) {
   u16 n = fetchWord();
   u8 r = opcode.slice(4, 5);
+#ifndef NDEBUG
+  fprintf(stderr, "ld r, 0x%x\n", n);
+#endif
   selectBcDeHlSp(r)->set(n);
 }
 
@@ -337,6 +377,9 @@ void Cpu::load_hl_sp_n8() {
 // cycles = 20
 void Cpu::load_n16_sp() {
   u16 word = fetchWord();
+#ifndef NDEBUG
+  fprintf(stderr, "ld [sp], 0x%x\n", word);
+#endif
   writeWord(get_sp(), word);
 }
 
@@ -361,6 +404,9 @@ void Cpu::pop(const Opcode& opcode) {
 // cycles = 16
 void Cpu::load_n16_a() {
   u16 addr = fetchWord();
+#ifndef NDEBUG
+  fprintf(stderr, "ld [0x%x], a\n", addr);
+#endif
   writeMemory(addr, get_a());
 }
 
@@ -368,6 +414,9 @@ void Cpu::load_n16_a() {
 // cycles = 16
 void Cpu::load_a_n16() {
   u16 addr = fetchWord();
+#ifndef NDEBUG
+  fprintf(stderr, "ld a, [0x%x]\n", addr);
+#endif
   set_a(readMemory(addr));
 }
 
@@ -453,6 +502,15 @@ void Cpu::cp_a_r(const Opcode& opcode) {
   alu.cp_n(readRegister(r));
 }
 
+// 11111110
+void Cpu::cp_a_n() {
+  u8 n = fetch();
+#ifndef NDEBUG
+  fprintf(stderr, "cp a, %x\n", n);
+#endif
+  alu.cp_n(n);
+}
+
 // 00xxx100
 void Cpu::inc_r8(const Opcode& opcode) {
   u8 r = opcode.slice(3, 5);
@@ -494,12 +552,18 @@ void Cpu::add_sp_n() {
 void Cpu::inc_r16(const Opcode& opcode) {
   u8 r = opcode.slice(4, 5);
   selectBcDeHlSp(r)->increment();
+#ifndef NDEBUG
+  fprintf(stderr, "inc16\n");
+#endif
 }
 
 // 00xx1011
 void Cpu::dec_r16(const Opcode& opcode) {
   u8 r = opcode.slice(4, 5);
   selectBcDeHlSp(r)->decrement();
+#ifndef NDEBUG
+  fprintf(stderr, "dec16\n");
+#endif
 }
 
 // CB + 00110xxx
@@ -919,14 +983,18 @@ void Cpu::call(u16 addr) {
 }
 
 void Cpu::handleInterrupt() {
-  if (ic->isLcdStatRequested() && ic->isLcdStatEnabled()) {
+  if (ic->isVBlankRequested() && ic->isVBlankEnabled()) {
     call(0x40);
     stalls += 12;
     halted = false;
+    ime = false;
+    ic->clearVBlank();
   } else if (ic->isLcdStatRequested() && ic->isLcdStatEnabled()) {
     call(0x48);
     stalls += 12;
     halted = false;
+    ime = false;
+    ic->clearLcdStat();
   }
 }
 

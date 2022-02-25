@@ -749,7 +749,7 @@ TEST(CpuTest, reti) {
   cpu->set_sp(0xfffe);
   cpu->tick();
   EXPECT_EQ(0x1234, cpu->get_pc());
-  EXPECT_TRUE(cpu->get_ime());
+  EXPECT_TRUE(cpu->interruptEnabled());
   expectCycles(8, cpu);
 }
 
@@ -892,7 +892,7 @@ TEST(CpuTest, di) {
 
   Cpu* cpu = new Cpu(&bus, &ic);
   cpu->tick();
-  EXPECT_FALSE(cpu->get_ime());
+  EXPECT_FALSE(cpu->interruptEnabled());
   expectCycles(4, cpu);
 }
 
@@ -958,7 +958,7 @@ TEST(CpuTest, ei) {
 
   Cpu* cpu = new Cpu(&bus, &ic);
   cpu->tick();
-  EXPECT_TRUE(cpu->get_ime());
+  EXPECT_TRUE(cpu->interruptEnabled());
   expectCycles(4, cpu);
 }
 

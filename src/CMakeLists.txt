@@ -20,8 +20,9 @@ add_library(
     cpu/alu.cc
     cpu/cpu.cc
     cpu/opcode.cc
-    graphics/display.cc
     graphics/ppu.cc
+    display/display.cc
+    display/minifb_display.cc
 )
 
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
@@ -51,10 +52,13 @@ add_executable(
     gbemu
     main.cc
 )
-target_link_libraries(gbemu gbemu_core)
+target_link_libraries(gbemu gbemu_core minifb)
 target_compile_options(
     gbemu PRIVATE
 )
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(USE_METAL_API "ON")
+endif()
 
 add_executable(
     gbemu_test
@@ -63,6 +67,7 @@ add_executable(
     cpu/alu_test.cc
     cpu/cpu_test.cc
     cpu/opcode_test.cc
+    graphics/ppu_test.cc
 )
 target_link_libraries(gbemu_test gbemu_core gtest_main gmock_main)
 target_compile_options(

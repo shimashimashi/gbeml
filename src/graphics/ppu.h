@@ -3,8 +3,8 @@
 
 #include <queue>
 
+#include "display/display.h"
 #include "graphics/color.h"
-#include "graphics/display.h"
 #include "interrupt/interrupt_controller.h"
 #include "memory/ram.h"
 #include "types/types.h"
@@ -28,8 +28,8 @@ class Lcdc {
   bool isBgEnabled() const;
 
   u16 windowTileMapArea() const;
-  u16 bgTileDataArea() const;
-  u16 bgTileMapArea() const;
+  u16 bgTileDataAddress(u8 offset) const;
+  u16 bgTileMapAddress(u16 offset) const;
   ObjSize objSize() const;
 
  private:
@@ -48,6 +48,7 @@ class LcdStat {
   bool isVBlankInterruptEnabled() const;
   bool isHBlankInterruptEnabled() const;
   bool isLycEqualsLy() const;
+  void setLycEqualsLy(bool flag);
 
   PpuMode getMode() const;
   void setMode(PpuMode mode);
@@ -83,8 +84,7 @@ class Ppu {
 
   void tick();
 
-  u8 readTileData(u16 addr) const;
-  u8 readTileMap(u16 addr) const;
+  u8 readVram(u16 addr) const;
   u8 readOam(u16 addr) const;
 
   u8 readLcdc() const;
@@ -99,8 +99,7 @@ class Ppu {
   u8 readObp0() const;
   u8 readObp1() const;
 
-  void writeTileData(u16 addr, u8 value);
-  void writeTileMap(u16 addr, u8 value);
+  void writeVram(u16 addr, u8 value);
   void writeOam(u16 addr, u8 value);
 
   void writeLcdc(u8 value);
@@ -131,16 +130,15 @@ class Ppu {
   u8 scx = 0;
   u8 ly = 0;
   u8 lyc = 0;
-  u8 lx = 0;
+  u16 lx = 0;
   u8 wy = 0;
   u8 wx = 0;
-  u32 cycles = 0;
 
   std::queue<Color> background_fifo;
 
   void draw();
 
-  u16 fetchTileNumber();
+  u8 fetchTileNumber();
   u8 fetchLowTileData();
   u8 fetchHighTileData();
 };

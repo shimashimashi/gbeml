@@ -1,5 +1,8 @@
 #include "gameboy.h"
 
+#include "bus/bus_impl.h"
+#include "memory/ram_impl.h"
+
 namespace gbemu {
 
 void GameBoy::tick() {
@@ -44,6 +47,7 @@ void GameBoy::init(const std::string& filename) {
   cpu->set_h(0x01);
   cpu->set_l(0x4d);
   cpu->set_pc(0x0100);
+  // cpu->set_pc(0x0000);
   cpu->set_sp(0xfffe);
 
   ppu->writeLcdc(0x91);
