@@ -1,4 +1,6 @@
 #include <MiniFB.h>
+#include <gflags/gflags.h>
+#include <glog/logging.h>
 
 #include <chrono>
 #include <cstdint>
@@ -14,6 +16,8 @@
 #define WIDTH 160
 #define HEIGHT 140
 static uint32_t g_buffer[WIDTH * HEIGHT];
+
+DEFINE_string(filename, "", "Rom filename");
 
 class Events {
  public:
@@ -115,11 +119,8 @@ class Events {
 };
 
 int main(int argc, char *argv[]) {
-  if (argc != 2) {
-    std::cout << "usage: gbemu <rom>.gb" << std::endl;
-    return 1;
-  }
-  std::string filename(argv[1]);
+  google::InitGoogleLogging(argv[0]);
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
 
   struct mfb_window *window =
       mfb_open_ex("GB Test", WIDTH, HEIGHT, WF_RESIZABLE);
@@ -143,13 +144,13 @@ int main(int argc, char *argv[]) {
   mfb_set_mouse_scroll_callback(
       std::bind(&Events::mouse_scroll, &e, _1, _2, _3, _4), window);
 
+  mfb_set_user_data(window, (void *)"GB Test");
+
   gbemu::Display *display = new gbemu::MiniFbDisplay();
   gbemu::GameBoy gb(display);
-  gb.init(filename);
+  gb.init(FLAGS_filename);
 
   std::cout << "GB init OK" << std::endl;
-
-  mfb_set_user_data(window, (void *)"GB Test");
 
   // std::chrono::steady_clock::time_point begin =
   //     std::chrono::steady_clock::now();

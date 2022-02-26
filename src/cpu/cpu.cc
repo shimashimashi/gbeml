@@ -1,7 +1,6 @@
 #include "cpu/cpu.h"
 
-#include <cassert>
-#include <cstdio>
+#include <glog/logging.h>
 
 namespace gbemu {
 
@@ -198,10 +197,8 @@ void Cpu::execute(const Opcode& opcode) {
   } else if (opcode.match("11111110")) {
     cp_a_n();
   } else {
-#ifndef NDEBUG
-    // assert(false);
-    fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
-#endif
+    DLOG(WARNING) << "opcode " << opcode.get() << " not implemented."
+                  << std::endl;
   }
 }
 
@@ -229,14 +226,14 @@ void Cpu::execute_cb(const Opcode& opcode) {
   } else if (opcode.match("11xxxyyy")) {
     set_b_r(opcode);
   } else {
-    assert(false);
-    fprintf(stderr, "opcode %x not implemented.\n", opcode.get());
+    DCHECK(false);
   }
 }
 
 void Cpu::load_r_n8(const Opcode& opcode) {
   u8 r = opcode.slice(3, 5);
   u8 n = fetch();
+  VLOG(1) << "ld r, 0x" << std::hex << int(n) << std::endl;
   writeRegister(r, n);
 }
 
@@ -245,9 +242,7 @@ void Cpu::load_r_r(const Opcode& opcode) {
   u8 r1 = opcode.slice(3, 5);
   u8 r2 = opcode.slice(0, 2);
   u8 n = readRegister(r2);
-#ifndef NDEBUG
-  fprintf(stderr, "ld r, r\n");
-#endif
+  VLOG(1) << "ld r, r" << std::endl;
   writeRegister(r1, n);
 }
 
@@ -255,33 +250,25 @@ void Cpu::load_r_r(const Opcode& opcode) {
 void Cpu::load_r_a(const Opcode& opcode) {
   switch (opcode.slice(4, 5)) {
     case 0:
-#ifndef NDEBUG
-      fprintf(stderr, "ld [bc], a\n");
-#endif
+      VLOG(1) << "ld [bc], a" << std::endl;
       writeMemory(get_bc(), get_a());
       break;
     case 1:
-#ifndef NDEBUG
-      fprintf(stderr, "ld [de], a\n");
-#endif
+      VLOG(1) << "ld [de], a" << std::endl;
       writeMemory(get_de(), get_a());
       break;
     case 2:
-#ifndef NDEBUG
-      fprintf(stderr, "ld [hl+], a\n");
-#endif
+      VLOG(1) << "ld [hl+], a" << std::endl;
       writeMemory(get_hl(), get_a());
       hl.increment();
       break;
     case 3:
-#ifndef NDEBUG
-      fprintf(stderr, "ld [hl-], a\n");
-#endif
+      VLOG(1) << "ld [hl-], a" << std::endl;
       writeMemory(get_hl(), get_a());
       hl.decrement();
       break;
     default:
-      assert(false);
+      DCHECK(false);
       break;
   }
 }
@@ -291,33 +278,25 @@ void Cpu::load_a_r(const Opcode& opcode) {
   u8 value = 0;
   switch (opcode.slice(4, 5)) {
     case 0:
-#ifndef NDEBUG
-      fprintf(stderr, "ld a, [bc]\n");
-#endif
+      VLOG(1) << "ld a, [bc]" << std::endl;
       value = readMemory(get_bc());
       break;
     case 1:
-#ifndef NDEBUG
-      fprintf(stderr, "ld a, [de]\n");
-#endif
+      VLOG(1) << "ld a, [de]" << std::endl;
       value = readMemory(get_de());
       break;
     case 2:
-#ifndef NDEBUG
-      fprintf(stderr, "ld a, [hl+]\n");
-#endif
+      VLOG(1) << "ld a, [hl+]" << std::endl;
       value = readMemory(get_hl());
       hl.increment();
       break;
     case 3:
-#ifndef NDEBUG
-      fprintf(stderr, "ld a, [hl-]\n");
-#endif
+      VLOG(1) << "ld a, [hl-]" << std::endl;
       value = readMemory(get_hl());
       hl.decrement();
       break;
     default:
-      assert(false);
+      DCHECK(false);
       break;
   }
   set_a(value);
@@ -332,18 +311,14 @@ void Cpu::load_c_a() { writeMemory(0xff00 + get_c(), get_a()); }
 // 11100000
 void Cpu::load_n_a() {
   u8 n = fetch();
-#ifndef NDEBUG
-  fprintf(stderr, "ld [0xff%x], a\n", n);
-#endif
+  VLOG(1) << "ld [0xff" << std::hex << int(n) << "], a" << std::endl;
   writeMemory(0xff00 + n, get_a());
 }
 
 // 11110000
 void Cpu::load_a_n() {
   u8 n = fetch();
-#ifndef NDEBUG
-  fprintf(stderr, "ld a, [0xff%x]\n", n);
-#endif
+  VLOG(1) << "ld a, [0xff" << std::hex << int(n) << "]" << std::endl;
   set_a(readMemory(0xff00 + n));
 }
 
@@ -352,9 +327,7 @@ void Cpu::load_a_n() {
 void Cpu::load_r_n16(const Opcode& opcode) {
   u16 n = fetchWord();
   u8 r = opcode.slice(4, 5);
-#ifndef NDEBUG
-  fprintf(stderr, "ld r, 0x%x\n", n);
-#endif
+  VLOG(1) << "ld r, 0x" << std::hex << int(n) << std::endl;
   selectBcDeHlSp(r)->set(n);
 }
 
@@ -377,9 +350,7 @@ void Cpu::load_hl_sp_n8() {
 // cycles = 20
 void Cpu::load_n16_sp() {
   u16 word = fetchWord();
-#ifndef NDEBUG
-  fprintf(stderr, "ld [sp], 0x%x\n", word);
-#endif
+  VLOG(1) << "ld [sp], 0x" << std::hex << int(word) << std::endl;
   writeWord(get_sp(), word);
 }
 
@@ -404,9 +375,7 @@ void Cpu::pop(const Opcode& opcode) {
 // cycles = 16
 void Cpu::load_n16_a() {
   u16 addr = fetchWord();
-#ifndef NDEBUG
-  fprintf(stderr, "ld [0x%x], a\n", addr);
-#endif
+  VLOG(1) << "ld [0x" << std::hex << int(addr) << "], a" << std::endl;
   writeMemory(addr, get_a());
 }
 
@@ -414,9 +383,7 @@ void Cpu::load_n16_a() {
 // cycles = 16
 void Cpu::load_a_n16() {
   u16 addr = fetchWord();
-#ifndef NDEBUG
-  fprintf(stderr, "ld a, [0x%x]\n", addr);
-#endif
+  VLOG(1) << "ld a, [0x" << std::hex << int(addr) << "]" << std::endl;
   set_a(readMemory(addr));
 }
 
@@ -505,9 +472,7 @@ void Cpu::cp_a_r(const Opcode& opcode) {
 // 11111110
 void Cpu::cp_a_n() {
   u8 n = fetch();
-#ifndef NDEBUG
-  fprintf(stderr, "cp a, %x\n", n);
-#endif
+  VLOG(1) << "cp a, 0x" << std::hex << int(n) << std::endl;
   alu.cp_n(n);
 }
 
@@ -552,18 +517,14 @@ void Cpu::add_sp_n() {
 void Cpu::inc_r16(const Opcode& opcode) {
   u8 r = opcode.slice(4, 5);
   selectBcDeHlSp(r)->increment();
-#ifndef NDEBUG
-  fprintf(stderr, "inc16\n");
-#endif
+  VLOG(1) << "inc16" << std::endl;
 }
 
 // 00xx1011
 void Cpu::dec_r16(const Opcode& opcode) {
   u8 r = opcode.slice(4, 5);
   selectBcDeHlSp(r)->decrement();
-#ifndef NDEBUG
-  fprintf(stderr, "dec16\n");
-#endif
+  VLOG(1) << "dec16" << std::endl;
 }
 
 // CB + 00110xxx
@@ -600,7 +561,7 @@ void Cpu::halt() {
 
 // 10 + 00000000
 void Cpu::stop() {
-  fprintf(stderr, "stop not implemented.\n");
+  VLOG(1) << "stop not implemented" << std::endl;
   return;
 }
 
@@ -816,7 +777,7 @@ void Cpu::rst_n(const Opcode& opcode) {
       addr = 0x38;
       break;
     default:
-      assert(false);
+      DCHECK(false);
       break;
   }
   set_pc(addr);
@@ -878,7 +839,7 @@ Register* Cpu::selectRegister(u8 r) {
     case 7:
       return af.getHigh();
     default:
-      assert(false);
+      DCHECK(false);
       return nullptr;
   }
 }
@@ -894,7 +855,7 @@ RegisterPair* Cpu::selectBcDeHlSp(u8 r) {
     case 3:
       return &sp;
     default:
-      assert(false);
+      DCHECK(false);
       return nullptr;
   }
 }
@@ -910,7 +871,7 @@ RegisterPair* Cpu::selectBcDeHlAf(u8 r) {
     case 3:
       return &af;
     default:
-      assert(false);
+      DCHECK(false);
       return nullptr;
   }
 }
@@ -959,7 +920,7 @@ bool Cpu::checkFlags(u8 n) {
     case 3:
       return alu.get_c();
     default:
-      assert(false);
+      DCHECK(false);
       return false;
   }
 }
