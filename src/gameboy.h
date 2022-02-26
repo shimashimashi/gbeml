@@ -18,7 +18,7 @@ class GameBoy {
  public:
   GameBoy(Display* display_) : display(display_) {}
   void tick();
-  void init(const std::string& filename);
+  bool init(const std::string& filename);
 
  private:
   Display* display;

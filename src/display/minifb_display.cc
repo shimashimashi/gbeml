@@ -1,8 +1,12 @@
 #include "display/minifb_display.h"
 
+#include "glog/logging.h"
+
 namespace gbemu {
 
 void MiniFbDisplay::pushRow(u8 y, const std::array<Color, 160>& pixels) {
+  DCHECK(y < 144);
+
   for (u8 i = 0; i < 160; ++i) {
     u32 rgb;
     switch (pixels[i]) {
@@ -24,6 +28,7 @@ void MiniFbDisplay::pushRow(u8 y, const std::array<Color, 160>& pixels) {
   }
 }
 
-u32 MiniFbDisplay::getPixel(u32 i) { return buffer[i]; }
+// u32 MiniFbDisplay::getPixel(u32 i) { return buffer[i]; }
+u32* MiniFbDisplay::getBuffer() { return buffer; }
 
 }  // namespace gbemu

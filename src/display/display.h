@@ -12,7 +12,8 @@ class Display {
  public:
   virtual ~Display();
   virtual void pushRow(u8 y, const std::array<Color, 160>& pixels) = 0;
-  virtual u32 getPixel(u32 i) = 0;
+  virtual u32* getBuffer() = 0;
+  // virtual u32 getPixel(u32 i) = 0;
 };
 
 }  // namespace gbemu

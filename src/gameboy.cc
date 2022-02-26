@@ -11,13 +11,13 @@ void GameBoy::tick() {
   bus->tick();
 }
 
-void GameBoy::init(const std::string& filename) {
+bool GameBoy::init(const std::string& filename) {
   ic = new InterruptController(0xe1, 0x00);
 
   rom = new Rom();
   rom->load(filename);
   if (!rom->isValid()) {
-    return;
+    return false;
   }
 
   switch (rom->cartridgeType) {
@@ -47,7 +47,6 @@ void GameBoy::init(const std::string& filename) {
   cpu->set_h(0x01);
   cpu->set_l(0x4d);
   cpu->set_pc(0x0100);
-  // cpu->set_pc(0x0000);
   cpu->set_sp(0xfffe);
 
   ppu->writeLcdc(0x91);
@@ -59,6 +58,8 @@ void GameBoy::init(const std::string& filename) {
   ppu->writeWy(0x00);
   ppu->writeWx(0x00);
   ppu->writeBgp(0xfc);
+
+  return true;
 }
 
 }  // namespace gbemu

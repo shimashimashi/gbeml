@@ -28,6 +28,7 @@ add_library(
     cpu/cpu.cc
     cpu/opcode.cc
     graphics/ppu.cc
+    graphics/dot.cc
     display/display.cc
     display/minifb_display.cc
 )
