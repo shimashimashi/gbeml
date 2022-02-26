@@ -37,7 +37,11 @@ bool Lcdc::isObjEnabled() const { return flags.getAt(1); }
 
 bool Lcdc::isBgEnabled() const { return flags.getAt(0); }
 
-u8 LcdStat::read() const { return flags.get(); }
+u8 LcdStat::read() const {
+  // clear lower 3 bits to be set later.
+  u8 n = flags.slice(3, 6);
+  return n << 3;
+}
 
 void LcdStat::write(u8 value) { return flags.set(value); }
 
@@ -48,48 +52,6 @@ bool LcdStat::isOamScanInterruptEnabled() const { return flags.getAt(5); }
 bool LcdStat::isVBlankInterruptEnabled() const { return flags.getAt(4); }
 
 bool LcdStat::isHBlankInterruptEnabled() const { return flags.getAt(3); }
-
-bool LcdStat::isLycEqualsLy() const { return flags.getAt(2); }
-
-void LcdStat::setLycEqualsLy(bool flag) { flags.setAt(2, flag); }
-
-PpuMode LcdStat::getMode() const {
-  u8 mode = flags.slice(0, 1);
-  switch (mode) {
-    case 0:
-      return PpuMode::HBlank;
-    case 1:
-      return PpuMode::VBlank;
-    case 2:
-      return PpuMode::OamScan;
-    case 3:
-      return PpuMode::Drawing;
-    default:
-      assert(false);
-      return PpuMode::HBlank;
-  }
-}
-
-void LcdStat::setMode(PpuMode mode) {
-  switch (mode) {
-    case PpuMode::HBlank:
-      flags.setAt(1, 0);
-      flags.setAt(0, 0);
-      break;
-    case PpuMode::VBlank:
-      flags.setAt(1, 0);
-      flags.setAt(0, 1);
-      break;
-    case PpuMode::OamScan:
-      flags.setAt(1, 1);
-      flags.setAt(0, 0);
-      break;
-    case PpuMode::Drawing:
-      flags.setAt(1, 1);
-      flags.setAt(0, 1);
-      break;
-  }
-}
 
 u8 Palette::read() const { return data.get(); }
 
@@ -131,105 +93,75 @@ Color Palette::getColor(u8 color_id) {
 }
 
 void Ppu::tick() {
-  lcdStat.setLycEqualsLy(ly == lyc);
-  if (lcdStat.isLycEqualsLy() && lcdStat.isLycEqualsLyInterruptEnabled()) {
+  if (!lcdc.isLcdEnabled()) {
+    return;
+  }
+
+  if (dot.requestsVBlankInterrupt() && lcdStat.isVBlankInterruptEnabled()) {
+    ic->signalVBlank();
+  }
+
+  if (requestsLcdStat()) {
     ic->signalLcdStat();
   }
 
-  switch (lcdStat.getMode()) {
-    case PpuMode::VBlank:
-      if (ly == 0) {
-        lcdStat.setMode(PpuMode::OamScan);
-        if (lcdStat.isOamScanInterruptEnabled()) {
-          ic->signalLcdStat();
-        }
-      }
-      break;
-    case PpuMode::OamScan:
-      if (lx == 80) {
-        lcdStat.setMode(PpuMode::Drawing);
-        while (!background_fifo.empty()) {
-          background_fifo.pop();
-        }
-      }
-      break;
-    case PpuMode::Drawing:
-      if (lx == 252) {
-        lcdStat.setMode(PpuMode::HBlank);
-        if (lcdStat.isHBlankInterruptEnabled()) {
-          ic->signalLcdStat();
-        }
-      }
-      break;
-    case PpuMode::HBlank:
-      if (lx == 0) {
-        if (ly < 144) {
-          lcdStat.setMode(PpuMode::OamScan);
-          if (lcdStat.isOamScanInterruptEnabled()) {
-            ic->signalLcdStat();
-          }
-        } else {
-          lcdStat.setMode(PpuMode::VBlank);
-          if (lcdStat.isVBlankInterruptEnabled()) {
-            ic->signalLcdStat();
-          }
-        }
-      }
-      break;
-  }
-
-  switch (lcdStat.getMode()) {
+  switch (dot.getMode()) {
     case PpuMode::OamScan:
       break;
     case PpuMode::Drawing:
-      if (lx % 8 == 0) {
-        draw();
+      if (dot.fetch()) {
+        fetchPixels();
       }
       break;
     case PpuMode::HBlank:
+      if (!background_fifo.empty()) {
+        pushPixels();
+      }
       break;
     case PpuMode::VBlank:
       break;
   }
 
-  if (lx == 455) {
-    ly = (ly + 1) % 154;
-  }
-  lx = (lx + 1) % 456;
+  dot.move();
 }
 
-void Ppu::draw() {
+void Ppu::fetchPixels() {
   u8 low = fetchLowTileData();
   u8 high = fetchHighTileData();
 
-  u8 num_discards = scx % 8;
-
   for (i64 i = 7; i >= 0; --i) {
-    if (lx == 80 && num_discards > 0) {
-      num_discards--;
+    if (dot.discardsCurrentPixel()) {
       continue;
     }
+
     u8 h = (high >> i) & 1;
     h <<= 1;
     u8 l = (low >> i) & 1;
     u8 color_id = h + l;
     Color color = bgp.getColor(color_id);
-    background_fifo.push(color);
-  }
 
-  if (background_fifo.size() == 160) {
-    std::array<Color, 160> pixels;
-    for (u8 i = 0; i < 160; ++i) {
-      pixels[i] = background_fifo.front();
-      background_fifo.pop();
+    if (background_fifo.size() < 160) {
+      background_fifo.push(color);
     }
-
-    display->pushRow(ly, pixels);
   }
 }
 
+void Ppu::pushPixels() {
+  std::array<Color, 160> pixels;
+  for (u8 i = 0; i < 160; ++i) {
+    pixels[i] = background_fifo.front();
+    background_fifo.pop();
+  }
+
+  display->pushRow(dot.getLy(), pixels);
+}
+
 u8 Ppu::readVram(u16 addr) const {
-  switch (lcdStat.getMode()) {
+  if (!lcdc.isLcdEnabled()) {
+    return vram->read(addr);
+  }
+
+  switch (dot.getMode()) {
     case PpuMode::Drawing:
       return 0xff;
     case PpuMode::OamScan:
@@ -240,7 +172,11 @@ u8 Ppu::readVram(u16 addr) const {
 }
 
 u8 Ppu::readOam(u16 addr) const {
-  switch (lcdStat.getMode()) {
+  if (!lcdc.isLcdEnabled()) {
+    return oam->read(addr);
+  }
+
+  switch (dot.getMode()) {
     case PpuMode::OamScan:
     case PpuMode::Drawing:
       return 0xff;
@@ -252,19 +188,37 @@ u8 Ppu::readOam(u16 addr) const {
 
 u8 Ppu::readLcdc() const { return lcdc.read(); }
 
-u8 Ppu::readLcdStat() const { return lcdStat.read(); }
+u8 Ppu::readLcdStat() const {
+  // lower 3 bits are garanteed to be cleared.
+  u8 n = lcdStat.read();
 
-u8 Ppu::readScy() const { return scy; }
+  if (dot.isLycEqualsLy()) {
+    n |= 0b100;
+  }
 
-u8 Ppu::readScx() const { return scx; }
+  switch (dot.getMode()) {
+    case PpuMode::HBlank:
+      return n | 0b00;
+    case PpuMode::VBlank:
+      return n | 0b01;
+    case PpuMode::OamScan:
+      return n | 0b10;
+    case PpuMode::Drawing:
+      return n | 0b11;
+  }
+}
 
-u8 Ppu::readLy() const { return ly; }
+u8 Ppu::readScy() const { return dot.getScy(); }
 
-u8 Ppu::readLyc() const { return lyc; }
+u8 Ppu::readScx() const { return dot.getScx(); }
 
-u8 Ppu::readWy() const { return wy; }
+u8 Ppu::readLy() const { return dot.getLy(); }
 
-u8 Ppu::readWx() const { return wx; }
+u8 Ppu::readLyc() const { return dot.getLyc(); }
+
+u8 Ppu::readWy() const { return dot.getWy(); }
+
+u8 Ppu::readWx() const { return dot.getWx(); }
 
 u8 Ppu::readBgp() const { return bgp.read(); }
 
@@ -273,23 +227,29 @@ u8 Ppu::readObp0() const { return obp0.read(); }
 u8 Ppu::readObp1() const { return obp1.read(); }
 
 void Ppu::writeVram(u16 addr, u8 value) {
-  // If we disable write while drawing, hello-world ROM doesn't run correctly.
-  // TODO: fix this
-  // switch (lcdStat.getMode()) {
-  //   case PpuMode::Drawing:
-  //     return;
-  //   case PpuMode::OamScan:
-  //   case PpuMode::HBlank:
-  //   case PpuMode::VBlank:
-  //     vram->write(addr, value);
-  //     return;
-  // }
+  if (!lcdc.isLcdEnabled()) {
+    vram->write(addr, value);
+    return;
+  }
 
-  vram->write(addr, value);
+  switch (dot.getMode()) {
+    case PpuMode::Drawing:
+      return;
+    case PpuMode::OamScan:
+    case PpuMode::HBlank:
+    case PpuMode::VBlank:
+      vram->write(addr, value);
+      return;
+  }
 }
 
 void Ppu::writeOam(u16 addr, u8 value) {
-  switch (lcdStat.getMode()) {
+  if (!lcdc.isLcdEnabled()) {
+    oam->write(addr, value);
+    return;
+  }
+
+  switch (dot.getMode()) {
     case PpuMode::OamScan:
     case PpuMode::Drawing:
       return;
@@ -304,17 +264,17 @@ void Ppu::writeLcdc(u8 value) { lcdc.write(value); }
 
 void Ppu::writeLcdStat(u8 value) { lcdStat.write(value); }
 
-void Ppu::writeScy(u8 value) { scy = value; }
+void Ppu::writeScy(u8 value) { dot.setScy(value); }
 
-void Ppu::writeScx(u8 value) { scx = value; }
+void Ppu::writeScx(u8 value) { dot.setScx(value); }
 
-void Ppu::writeLy(u8 value) { ly = value; }
+void Ppu::writeLy(u8 value) { dot.setLy(value); }
 
-void Ppu::writeLyc(u8 value) { lyc = value; }
+void Ppu::writeLyc(u8 value) { dot.setLyc(value); }
 
-void Ppu::writeWy(u8 value) { wy = value; }
+void Ppu::writeWy(u8 value) { dot.setWy(value); }
 
-void Ppu::writeWx(u8 value) { wx = value; }
+void Ppu::writeWx(u8 value) { dot.setWx(value); }
 
 void Ppu::writeBgp(u8 value) { bgp.write(value); }
 
@@ -323,9 +283,7 @@ void Ppu::writeObp0(u8 value) { obp0.write(value); }
 void Ppu::writeObp1(u8 value) { obp1.write(value); }
 
 u8 Ppu::fetchTileNumber() {
-  u8 x = ((scx + lx - 80) & 0xff) / 8;
-  u8 y = ((scy + ly) & 0xff) / 8;
-  u16 offset = (x + y * 32) & 0x3ff;
+  u16 offset = dot.getTileMapAddressOffset();
   u16 addr = lcdc.bgTileMapAddress(offset);
   return vram->read(addr);
 }
@@ -333,15 +291,25 @@ u8 Ppu::fetchTileNumber() {
 u8 Ppu::fetchLowTileData() {
   u8 tile_number = fetchTileNumber();
   u16 base = lcdc.bgTileDataAddress(tile_number);
-  u8 offset = 2 * ((ly + scy) % 8);
+  u8 offset = dot.getLowTileDataAddressOffset();
   return vram->read(base + offset);
 }
 
 u8 Ppu::fetchHighTileData() {
   u8 tile_number = fetchTileNumber();
   u16 base = lcdc.bgTileDataAddress(tile_number);
-  u8 offset = 2 * ((ly + scy) % 8);
-  return vram->read(base + offset + 1);
+  u8 offset = dot.getHighTileDataAddressOffset();
+  return vram->read(base + offset);
+}
+
+bool Ppu::requestsLcdStat() {
+  return (dot.requestsHBlankInterrupt() &&
+          lcdStat.isHBlankInterruptEnabled()) ||
+         (dot.requestsOamScanInterrupt() &&
+          lcdStat.isOamScanInterruptEnabled()) ||
+         (dot.requestsLycEqualsLyInterrupt() &&
+          lcdStat.isLycEqualsLyInterruptEnabled()) ||
+         (dot.requestsVBlankInterrupt() && lcdStat.isVBlankInterruptEnabled());
 }
 
 }  // namespace gbemu

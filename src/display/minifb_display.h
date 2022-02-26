@@ -13,10 +13,12 @@ class MiniFbDisplay : public Display {
  public:
   MiniFbDisplay() {}
   void pushRow(u8 y, const std::array<Color, 160>& pixels) override;
-  u32 getPixel(u32 i) override;
+  // u32 getPixel(u32 i) override;
+  u32* getBuffer() override;
 
  private:
-  std::array<u32, 160 * 144> buffer;
+  // std::array<u32, 160 * 144> buffer;
+  u32 buffer[160 * 144];
 };
 
 }  // namespace gbemu

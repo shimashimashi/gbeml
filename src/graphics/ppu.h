@@ -5,6 +5,8 @@
 
 #include "display/display.h"
 #include "graphics/color.h"
+#include "graphics/dot.h"
+#include "graphics/ppu_mode.h"
 #include "interrupt/interrupt_controller.h"
 #include "memory/ram.h"
 #include "types/types.h"
@@ -12,8 +14,6 @@
 namespace gbemu {
 
 enum class ObjSize { Normal, Tall };
-
-enum class PpuMode { HBlank, VBlank, OamScan, Drawing };
 
 class Lcdc {
  public:
@@ -47,11 +47,6 @@ class LcdStat {
   bool isOamScanInterruptEnabled() const;
   bool isVBlankInterruptEnabled() const;
   bool isHBlankInterruptEnabled() const;
-  bool isLycEqualsLy() const;
-  void setLycEqualsLy(bool flag);
-
-  PpuMode getMode() const;
-  void setMode(PpuMode mode);
 
  private:
   Register flags;
@@ -80,7 +75,8 @@ class Ppu {
         lcdStat(0),
         bgp(0),
         obp0(0),
-        obp1(0) {}
+        obp1(0),
+        dot() {}
 
   void tick();
 
@@ -125,22 +121,18 @@ class Ppu {
   Palette bgp;
   Palette obp0;
   Palette obp1;
-
-  u8 scy = 0;
-  u8 scx = 0;
-  u8 ly = 0;
-  u8 lyc = 0;
-  u16 lx = 0;
-  u8 wy = 0;
-  u8 wx = 0;
+  Dot dot;
 
   std::queue<Color> background_fifo;
 
-  void draw();
+  void fetchPixels();
+  void pushPixels();
 
   u8 fetchTileNumber();
   u8 fetchLowTileData();
   u8 fetchHighTileData();
+
+  bool requestsLcdStat();
 };
 
 }  // namespace gbemu
