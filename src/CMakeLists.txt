@@ -98,7 +98,7 @@ add_custom_target(
   COMMAND ctest -L gbemu
   COMMAND lcov --rc lcov_branch_coverage=1 -d src/CMakeFiles -c -o coverage_test.info > lcov.log 2>&1
   COMMAND lcov --rc lcov_branch_coverage=1 -a coverage_base.info -a coverage_test.info -o coverage_all.info > lcov.log 2>&1
-  COMMAND lcov --rc lcov_branch_coverage=1 -r coverage_all.info *_test.cc *gtest* */usr/include/c++/v1/* -o coverage.info >> lcov.log 2>&1
+  COMMAND lcov --rc lcov_branch_coverage=1 -r coverage_all.info *_test.cc *gtest* */usr/include/c++/v1/* *glog* -o coverage.info >> lcov.log 2>&1
   COMMAND genhtml -o lcovHtml --num-spaces 4 -s --legend --branch-coverage coverage.info >> lcov.log 2>&1
   COMMENT [[create coverage report as lcovHtml/index.html, and log as lcov.log]]
 )
