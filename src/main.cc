@@ -1,4 +1,3 @@
-#include <MiniFB.h>
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 
@@ -39,8 +38,8 @@ int main(int argc, char *argv[]) {
       gb.tick();
     }
 
-    mfb_update_state state = window.update(display->getBuffer());
-    if (state != STATE_OK) {
+    gbemu::u32 *buffer = display->getBuffer();
+    if (!window.update(buffer)) {
       break;
     }
   } while (window.waitSync());

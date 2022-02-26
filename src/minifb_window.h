@@ -1,5 +1,7 @@
 #include <MiniFB.h>
 
+#include <cstdio>
+
 namespace gbemu {
 
 #define kUnused(var) (void)var;
@@ -136,7 +138,10 @@ class MiniFbWindow {
 
   bool waitSync() { return mfb_wait_sync(window); }
 
-  mfb_update_state update(u32 *buffer) { return mfb_update(window, buffer); }
+  bool update(u32 *buffer) {
+    mfb_update_state state = mfb_update(window, buffer);
+    return state == STATE_OK;
+  }
 
  private:
   struct mfb_window *window;
