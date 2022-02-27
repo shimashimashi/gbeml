@@ -3,23 +3,23 @@
 
 #include <iostream>
 
-#include "display/display.h"
-#include "display/minifb_display.h"
-#include "gameboy.h"
-#include "minifb_window.h"
+#include "core/gameboy.h"
+#include "driver/minifb/minifb_display.h"
+#include "driver/minifb/minifb_window.h"
 
 DEFINE_string(filename, "", "Rom filename");
 
 int main(int argc, char *argv[]) {
   google::InitGoogleLogging(argv[0]);
   gflags::ParseCommandLineFlags(&argc, &argv, true);
+
   if (FLAGS_filename.empty()) {
     std::cout << "Rom filename is empty." << std::endl;
     return 1;
   }
 
-  gbemu::Display *display = new gbemu::MiniFbDisplay();
-  gbemu::GameBoy gb(display);
+  gbemu::MiniFbDisplay display;
+  gbemu::GameBoy gb(&display);
   if (!gb.init(FLAGS_filename)) {
     std::cout << "Failed to initialize gb." << std::endl;
     return 1;
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
       gb.tick();
     }
 
-    gbemu::u32 *buffer = display->getBuffer();
+    gbemu::u32 *buffer = display.getBuffer();
     if (!window.update(buffer)) {
       break;
     }
