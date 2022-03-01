@@ -22,13 +22,9 @@ class Alu {
   void add_hl_n16(RegisterPair* r, u16 n);
   void add_sp_n8(RegisterPair* r, u8 n);
 
-  void inc_r(Register* r);
-  void dec_r(Register* r);
-  void inc_memory(u16 addr, Bus* bus);
-  void dec_memory(u16 addr, Bus* bus);
-
-  void swap_r(Register* r);
-  void swap_memory(u16 addr, Bus* bus);
+  u8 inc(u8 n);
+  u8 dec(u8 n);
+  u8 swap(u8 n);
 
   void daa();
 
@@ -40,27 +36,19 @@ class Alu {
   void rla();
   void rrca();
   void rra();
-  void rlc_r(Register* r);
-  void rlc_memory(u16 addr, Bus* bus);
-  void rl_r(Register* r);
-  void rl_memory(u16 addr, Bus* bus);
-  void rrc_r(Register* r);
-  void rrc_memory(u16 addr, Bus* bus);
-  void rr_r(Register* r);
-  void rr_memory(u16 addr, Bus* bus);
 
-  void sla_r(Register* r);
-  void sla_memory(u16 addr, Bus* bus);
-  void sra_r(Register* r);
-  void sra_memory(u16 addr, Bus* bus);
-  void srl_r(Register* r);
-  void srl_memory(u16 addr, Bus* bus);
+  u8 rlc(u8 n);
+  u8 rl(u8 n);
+  u8 rrc(u8 n);
+  u8 rr(u8 n);
 
-  void bit_b_r(u8 i, u8 n);
-  void set_b_r(u8 i, Register* r);
-  void set_b_memory(u8 i, u16 addr, Bus* bus);
-  void res_b_r(u8 i, Register* r);
-  void res_b_memory(u8 i, u16 addr, Bus* bus);
+  u8 sla(u8 n);
+  u8 sra(u8 n);
+  u8 srl(u8 n);
+
+  void bit_b(u8 i, u8 n);
+  u8 set_b(u8 i, u8 n);
+  u8 res_b(u8 i, u8 n);
 
   u8 get_a();
   bool get_z();
@@ -77,12 +65,6 @@ class Alu {
 
  private:
   RegisterPair* af;
-
-  u8 swap(u8 n);
-
-  void setFlagsInc(u8 n);
-  void setFlagsDec(u8 n);
-  void setFlagsSwap(u8 n);
 
   u8 rotateLeft(u8 n);
   u8 rotateLeftThroughCarry(u8 n);

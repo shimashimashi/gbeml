@@ -479,23 +479,15 @@ void Cpu::cp_a_n() {
 // 00xxx100
 void Cpu::inc_r8(const Opcode& opcode) {
   u8 r = opcode.slice(3, 5);
-  if (r == 6) {
-    alu.inc_memory(get_hl(), bus);
-    stalls += 8;
-  } else {
-    alu.inc_r(selectRegister(r));
-  }
+  u8 n = alu.inc(readRegister(r));
+  writeRegister(r, n);
 }
 
 // 00xxx101
 void Cpu::dec_r8(const Opcode& opcode) {
   u8 r = opcode.slice(3, 5);
-  if (r == 6) {
-    alu.dec_memory(get_hl(), bus);
-    stalls += 8;
-  } else {
-    alu.dec_r(selectRegister(r));
-  }
+  u8 n = alu.dec(readRegister(r));
+  writeRegister(r, n);
 }
 
 // 00xx1001
@@ -530,12 +522,8 @@ void Cpu::dec_r16(const Opcode& opcode) {
 // CB + 00110xxx
 void Cpu::swap(const Opcode& opcode) {
   u8 r = opcode.slice(0, 3);
-  if (r == 6) {
-    alu.swap_memory(get_hl(), bus);
-    stalls += 8;
-  } else {
-    alu.swap_r(selectRegister(r));
-  }
+  u8 n = alu.swap(readRegister(r));
+  writeRegister(r, n);
 }
 
 // 00100111
@@ -586,109 +574,73 @@ void Cpu::rra() { alu.rra(); }
 // CB + 00000xxx
 void Cpu::rlc_n(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  if (r == 6) {
-    alu.rlc_memory(get_hl(), bus);
-    stalls += 8;
-  } else {
-    alu.rlc_r(selectRegister(r));
-  }
+  u8 n = alu.rlc(readRegister(r));
+  writeRegister(r, n);
 }
 
 // CB + 00010xxx
 void Cpu::rl_n(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  if (r == 6) {
-    alu.rl_memory(get_hl(), bus);
-    stalls += 8;
-  } else {
-    alu.rl_r(selectRegister(r));
-  }
+  u8 n = alu.rl(readRegister(r));
+  writeRegister(r, n);
 }
 
 // CB + 00001xxx
 void Cpu::rrc_n(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  if (r == 6) {
-    alu.rrc_memory(get_hl(), bus);
-    stalls += 8;
-  } else {
-    alu.rrc_r(selectRegister(r));
-  }
+  u8 n = alu.rrc(readRegister(r));
+  writeRegister(r, n);
 }
 
 // CB + 00011xxx
 void Cpu::rr_n(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  if (r == 6) {
-    alu.rr_memory(get_hl(), bus);
-    stalls += 8;
-  } else {
-    alu.rr_r(selectRegister(r));
-  }
+  u8 n = alu.rr(readRegister(r));
+  writeRegister(r, n);
 }
 
 // CB + 00100xxx
 void Cpu::sla_n(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  if (r == 6) {
-    alu.sla_memory(get_hl(), bus);
-    stalls += 8;
-  } else {
-    alu.sla_r(selectRegister(r));
-  }
+  u8 n = alu.sla(readRegister(r));
+  writeRegister(r, n);
 }
 
 // CB + 00101xxx
 void Cpu::sra_n(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  if (r == 6) {
-    alu.sra_memory(get_hl(), bus);
-    stalls += 8;
-  } else {
-    alu.sra_r(selectRegister(r));
-  }
+  u8 n = alu.sra(readRegister(r));
+  writeRegister(r, n);
 }
 
 // CB + 00111xxx
 void Cpu::srl_n(const Opcode& opcode) {
   u8 r = opcode.slice(0, 2);
-  if (r == 6) {
-    alu.srl_memory(get_hl(), bus);
-    stalls += 8;
-  } else {
-    alu.srl_r(selectRegister(r));
-  }
+  u8 n = alu.srl(readRegister(r));
+  writeRegister(r, n);
 }
 
 // CB + 01xxxyyy
 void Cpu::bit_b_r(const Opcode& opcode) {
   u8 i = opcode.slice(3, 5);
   u8 r = opcode.slice(0, 2);
-  alu.bit_b_r(i, readRegister(r));
+  alu.bit_b(i, readRegister(r));
 }
 
 // CB + 11xxxyyy
 void Cpu::set_b_r(const Opcode& opcode) {
   u8 i = opcode.slice(3, 5);
   u8 r = opcode.slice(0, 2);
-  if (r == 6) {
-    alu.set_b_memory(i, get_hl(), bus);
-    stalls += 8;
-  } else {
-    alu.set_b_r(i, selectRegister(r));
-  }
+  u8 n = alu.set_b(i, readRegister(r));
+  writeRegister(r, n);
 }
 
 // CB + 10xxxyyy
 void Cpu::res_b_r(const Opcode& opcode) {
   u8 i = opcode.slice(3, 5);
   u8 r = opcode.slice(0, 2);
-  if (r == 6) {
-    alu.res_b_memory(i, get_hl(), bus);
-    stalls += 8;
-  } else {
-    alu.res_b_r(i, selectRegister(r));
-  }
+  u8 n = alu.res_b(i, readRegister(r));
+  writeRegister(r, n);
 }
 
 // 11000011
@@ -807,40 +759,50 @@ void Cpu::reti() {
 }
 
 u8 Cpu::readRegister(u8 r) {
-  if (r == 6) {
-    return readMemory(get_hl());
-  } else {
-    return selectRegister(r)->get();
+  switch (r) {
+    case 0:
+      return bc.getHigh()->get();
+    case 1:
+      return bc.getLow()->get();
+    case 2:
+      return de.getHigh()->get();
+    case 3:
+      return de.getLow()->get();
+    case 4:
+      return hl.getHigh()->get();
+    case 5:
+      return hl.getLow()->get();
+    case 6:
+      return readMemory(hl.get());
+    case 7:
+      return af.getHigh()->get();
+    default:
+      DCHECK(false);
+      return 0;
   }
 }
 
 void Cpu::writeRegister(u8 r, u8 n) {
-  if (r == 6) {
-    writeMemory(get_hl(), n);
-  } else {
-    selectRegister(r)->set(n);
-  }
-}
-
-Register* Cpu::selectRegister(u8 r) {
   switch (r) {
     case 0:
-      return bc.getHigh();
+      return bc.getHigh()->set(n);
     case 1:
-      return bc.getLow();
+      return bc.getLow()->set(n);
     case 2:
-      return de.getHigh();
+      return de.getHigh()->set(n);
     case 3:
-      return de.getLow();
+      return de.getLow()->set(n);
     case 4:
-      return hl.getHigh();
+      return hl.getHigh()->set(n);
     case 5:
-      return hl.getLow();
+      return hl.getLow()->set(n);
+    case 6:
+      return writeMemory(hl.get(), n);
     case 7:
-      return af.getHigh();
+      return af.getHigh()->set(n);
     default:
       DCHECK(false);
-      return nullptr;
+      return;
   }
 }
 

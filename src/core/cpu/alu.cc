@@ -86,40 +86,30 @@ void Alu::add_sp_n8(RegisterPair* r, u8 n) {
   r->set(sp + n);
 }
 
-void Alu::inc_r(Register* r) {
-  u8 n = r->get();
-  setFlagsInc(n);
-  r->set(n + 1);
+u8 Alu::inc(u8 n) {
+  set_h((n & 0xf) == 0xf);
+  set_z(static_cast<u8>(n + 1) == 0);
+  set_n(false);
+  return n + 1;
 }
 
-void Alu::dec_r(Register* r) {
-  u8 n = r->get();
-  setFlagsDec(n);
-  r->set(n - 1);
+u8 Alu::dec(u8 n) {
+  set_h((n & 0xf) < 1);
+  set_z(static_cast<u8>(n - 1) == 0);
+  set_n(false);
+  return n - 1;
 }
 
-void Alu::inc_memory(u16 addr, Bus* bus) {
-  u8 n = bus->read(addr);
-  setFlagsInc(n);
-  bus->write(addr, n + 1);
-}
+u8 Alu::swap(u8 n) {
+  set_z(n == 0);
+  set_n(false);
+  set_h(false);
+  set_c(false);
 
-void Alu::dec_memory(u16 addr, Bus* bus) {
-  u8 n = bus->read(addr);
-  setFlagsDec(n);
-  bus->write(addr, n - 1);
-}
-
-void Alu::swap_r(Register* r) {
-  u8 n = r->get();
-  setFlagsSwap(n);
-  r->set(swap(n));
-}
-
-void Alu::swap_memory(u16 addr, Bus* bus) {
-  u8 n = bus->read(addr);
-  setFlagsSwap(n);
-  bus->write(addr, swap(n));
+  u8 h = n >> 4;
+  u8 l = n & 0xf;
+  l <<= 4;
+  return l + h;
 }
 
 void Alu::daa() {
@@ -193,120 +183,29 @@ void Alu::rra() {
   set_a(n);
 }
 
-void Alu::rlc_r(Register* r) {
-  u8 n = rotateLeft(r->get());
-  r->set(n);
-}
+u8 Alu::rlc(u8 n) { return rotateLeft(n); }
 
-void Alu::rlc_memory(u16 addr, Bus* bus) {
-  u8 n = rotateLeft(bus->read(addr));
-  bus->write(addr, n);
-}
+u8 Alu::rl(u8 n) { return rotateLeftThroughCarry(n); }
 
-void Alu::rl_r(Register* r) {
-  u8 n = rotateLeftThroughCarry(r->get());
-  r->set(n);
-}
+u8 Alu::rrc(u8 n) { return rotateRight(n); }
 
-void Alu::rl_memory(u16 addr, Bus* bus) {
-  u8 n = rotateLeftThroughCarry(bus->read(addr));
-  bus->write(addr, n);
-}
+u8 Alu::rr(u8 n) { return rotateRightThroughCarry(n); }
 
-void Alu::rrc_r(Register* r) {
-  u8 n = rotateRight(r->get());
-  r->set(n);
-}
+u8 Alu::sla(u8 n) { return shiftLeft(n); }
 
-void Alu::rrc_memory(u16 addr, Bus* bus) {
-  u8 n = rotateRight(bus->read(addr));
-  bus->write(addr, n);
-}
+u8 Alu::sra(u8 n) { return shiftRightArithmetic(n); }
 
-void Alu::rr_r(Register* r) {
-  u8 n = rotateRightThroughCarry(r->get());
-  r->set(n);
-}
+u8 Alu::srl(u8 n) { return shiftRightLogical(n); }
 
-void Alu::rr_memory(u16 addr, Bus* bus) {
-  u8 n = rotateRightThroughCarry(bus->read(addr));
-  bus->write(addr, n);
-}
-
-void Alu::sla_r(Register* r) {
-  u8 n = shiftLeft(r->get());
-  r->set(n);
-}
-
-void Alu::sla_memory(u16 addr, Bus* bus) {
-  u8 n = shiftLeft(bus->read(addr));
-  bus->write(addr, n);
-}
-
-void Alu::sra_r(Register* r) {
-  u8 n = shiftRightArithmetic(r->get());
-  r->set(n);
-}
-
-void Alu::sra_memory(u16 addr, Bus* bus) {
-  u8 n = shiftRightArithmetic(bus->read(addr));
-  bus->write(addr, n);
-}
-
-void Alu::srl_r(Register* r) {
-  u8 n = shiftRightLogical(r->get());
-  r->set(n);
-}
-
-void Alu::srl_memory(u16 addr, Bus* bus) {
-  u8 n = shiftRightLogical(bus->read(addr));
-  bus->write(addr, n);
-}
-
-void Alu::bit_b_r(u8 i, u8 n) {
+void Alu::bit_b(u8 i, u8 n) {
   set_z(((n >> i) & 1) == 0);
   set_n(false);
   set_h(true);
 }
 
-void Alu::set_b_r(u8 i, Register* r) {
-  u8 n = setBit(i, r->get());
-  r->set(n);
-}
+u8 Alu::set_b(u8 i, u8 n) { return setBit(i, n); }
 
-void Alu::set_b_memory(u8 i, u16 addr, Bus* bus) {
-  u8 n = setBit(i, bus->read(addr));
-  bus->write(addr, n);
-}
-
-void Alu::res_b_r(u8 i, Register* r) {
-  u8 n = resetBit(i, r->get());
-  r->set(n);
-}
-
-void Alu::res_b_memory(u8 i, u16 addr, Bus* bus) {
-  u8 n = resetBit(i, bus->read(addr));
-  bus->write(addr, n);
-}
-
-void Alu::setFlagsInc(u8 n) {
-  set_h((n & 0xf) == 0xf);
-  set_z(static_cast<u8>(n + 1) == 0);
-  set_n(false);
-}
-
-void Alu::setFlagsDec(u8 n) {
-  set_h((n & 0xf) < 1);
-  set_z(static_cast<u8>(n - 1) == 0);
-  set_n(false);
-}
-
-void Alu::setFlagsSwap(u8 n) {
-  set_z(n == 0);
-  set_n(false);
-  set_h(false);
-  set_c(false);
-}
+u8 Alu::res_b(u8 i, u8 n) { return resetBit(i, n); }
 
 u8 Alu::rotateLeft(u8 n) {
   u8 res = static_cast<u8>(n << 1) | (n >> 7);
@@ -381,13 +280,6 @@ u8 Alu::resetBit(u8 i, u8 n) {
   u8 b = 1;
   b <<= i;
   return n & ~b;
-}
-
-u8 Alu::swap(u8 n) {
-  u8 h = n >> 4;
-  u8 l = n & 0xf;
-  l <<= 4;
-  return l + h;
 }
 
 }  // namespace gbemu
