@@ -53,108 +53,72 @@ bool LcdStat::isVBlankInterruptEnabled() const { return flags.getAt(4); }
 
 bool LcdStat::isHBlankInterruptEnabled() const { return flags.getAt(3); }
 
-u8 Palette::read() const { return data.get(); }
-
-void Palette::write(u8 value) { return data.set(value); }
-
-Color Palette::getColor(u8 color_id) {
-  u8 color = 0;
-  switch (color_id) {
-    case 0:
-      color = data.slice(0, 1);
-      break;
-    case 1:
-      color = data.slice(2, 3);
-      break;
-    case 2:
-      color = data.slice(4, 5);
-      break;
-    case 3:
-      color = data.slice(6, 7);
-      break;
-    default:
-      assert(false);
-      break;
-  }
-
-  switch (color) {
-    case 0:
-      return Color::White;
-    case 1:
-      return Color::LightGray;
-    case 2:
-      return Color::DarkGray;
-    case 3:
-      return Color::Black;
-    default:
-      assert(false);
-      return Color::White;
-  }
-}
-
 void Ppu::tick() {
   if (!lcdc.isLcdEnabled()) {
     return;
   }
 
-  if (dot.requestsVBlankInterrupt() && lcdStat.isVBlankInterruptEnabled()) {
-    ic->signalVBlank();
-  }
-
-  if (requestsLcdStat()) {
-    ic->signalLcdStat();
-  }
-
-  switch (dot.getMode()) {
+  PpuMode current = dot.getMode();
+  switch (current) {
     case PpuMode::OamScan:
       break;
     case PpuMode::Drawing:
-      if (dot.fetch()) {
-        fetchPixels();
+      if (dot.getLx() % 8 == 0) {
+        fetch();
       }
       break;
     case PpuMode::HBlank:
-      if (!background_fifo.empty()) {
-        pushPixels();
-      }
       break;
     case PpuMode::VBlank:
       break;
   }
 
-  dot.move();
+  dot.moveNext();
+  PpuMode next = dot.getMode();
+
+  if (current != next) {
+    switch (next) {
+      case PpuMode::OamScan:
+        if (lcdStat.isOamScanInterruptEnabled()) {
+          ic->signalLcdStat();
+        }
+        break;
+      case PpuMode::Drawing:
+        background_fifo.setScx(dot.getScx());
+        break;
+      case PpuMode::HBlank:
+        render();
+        if (lcdStat.isHBlankInterruptEnabled()) {
+          ic->signalLcdStat();
+        }
+        break;
+      case PpuMode::VBlank:
+        ic->signalVBlank();
+        if (lcdStat.isVBlankInterruptEnabled()) {
+          ic->signalLcdStat();
+        }
+        break;
+    }
+
+    if (dot.isLycEqualsLy() && lcdStat.isLycEqualsLyInterruptEnabled()) {
+      ic->signalLcdStat();
+    }
+  }
 }
 
-void Ppu::fetchPixels() {
+void Ppu::fetch() {
   u8 low = fetchLowTileData();
   u8 high = fetchHighTileData();
 
-  for (i64 i = 7; i >= 0; --i) {
-    if (dot.discardsCurrentPixel()) {
-      continue;
-    }
-
-    u8 h = (high >> i) & 1;
-    h <<= 1;
-    u8 l = (low >> i) & 1;
-    u8 color_id = h + l;
-    Color color = bgp.getColor(color_id);
-
-    if (background_fifo.size() < 160) {
-      background_fifo.push(color);
-    }
-  }
+  background_fifo.pushLowTileData(low);
+  background_fifo.pushHighTileData(high);
 }
 
-void Ppu::pushPixels() {
+void Ppu::render() {
   std::array<Color, 160> pixels;
-  for (u8 i = 0; i < 160; ++i) {
-    pixels[i] = background_fifo.front();
-    background_fifo.pop();
-  }
 
-  u8 line = dot.getLy();
-  display->pushRow(line, pixels);
+  background_fifo.popPixels(&pixels);
+  display->pushRow(dot.getLy(), pixels);
 }
 
 u8 Ppu::readVram(u16 addr) const {
@@ -277,7 +241,10 @@ void Ppu::writeWy(u8 value) { dot.setWy(value); }
 
 void Ppu::writeWx(u8 value) { dot.setWx(value); }
 
-void Ppu::writeBgp(u8 value) { bgp.write(value); }
+void Ppu::writeBgp(u8 value) {
+  bgp.write(value);
+  background_fifo.setPalette(value);
+}
 
 void Ppu::writeObp0(u8 value) { obp0.write(value); }
 
@@ -301,16 +268,6 @@ u8 Ppu::fetchHighTileData() {
   u16 base = lcdc.bgTileDataAddress(tile_number);
   u8 offset = dot.getHighTileDataAddressOffset();
   return vram->read(base + offset);
-}
-
-bool Ppu::requestsLcdStat() {
-  return (dot.requestsHBlankInterrupt() &&
-          lcdStat.isHBlankInterruptEnabled()) ||
-         (dot.requestsOamScanInterrupt() &&
-          lcdStat.isOamScanInterruptEnabled()) ||
-         (dot.requestsLycEqualsLyInterrupt() &&
-          lcdStat.isLycEqualsLyInterruptEnabled()) ||
-         (dot.requestsVBlankInterrupt() && lcdStat.isVBlankInterruptEnabled());
 }
 
 }  // namespace gbemu

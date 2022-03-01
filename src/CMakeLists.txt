@@ -27,6 +27,8 @@ add_library(
     core/cpu/alu.cc
     core/cpu/cpu.cc
     core/cpu/opcode.cc
+    core/graphics/palette.cc
+    core/graphics/pixel_fifo.cc
     core/graphics/ppu.cc
     core/graphics/dot.cc
     core/display/display.cc

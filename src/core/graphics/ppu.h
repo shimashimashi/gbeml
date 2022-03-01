@@ -1,12 +1,12 @@
 #ifndef GBEMU_PPU_H_
 #define GBEMU_PPU_H_
 
-#include <queue>
-
 #include "core/display/display.h"
 #include "core/graphics/color.h"
 #include "core/graphics/dot.h"
 #include "core/graphics/mode.h"
+#include "core/graphics/palette.h"
+#include "core/graphics/pixel_fifo.h"
 #include "core/interrupt/interrupt_controller.h"
 #include "core/memory/ram.h"
 #include "core/types/types.h"
@@ -52,18 +52,6 @@ class LcdStat {
   Register flags;
 };
 
-class Palette {
- public:
-  Palette(u8 data_) : data(data_) {}
-
-  u8 read() const;
-  void write(u8 value);
-  Color getColor(u8 color_id);
-
- private:
-  Register data;
-};
-
 class Ppu {
  public:
   Ppu(Display* display_, Ram* vram_, Ram* oam_, InterruptController* ic_)
@@ -76,7 +64,8 @@ class Ppu {
         bgp(0),
         obp0(0),
         obp1(0),
-        dot() {}
+        dot(),
+        background_fifo() {}
 
   void tick();
 
@@ -122,11 +111,12 @@ class Ppu {
   Palette obp0;
   Palette obp1;
   Dot dot;
+  PixelFifo background_fifo;
 
-  std::queue<Color> background_fifo;
+  u64 stalls = 0;
 
-  void fetchPixels();
-  void pushPixels();
+  void fetch();
+  void render();
 
   u8 fetchTileNumber();
   u8 fetchLowTileData();

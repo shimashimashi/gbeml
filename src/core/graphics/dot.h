@@ -22,7 +22,7 @@ class Dot {
   void setWy(u8 value);
   void setWx(u8 value);
 
-  void move();
+  void moveNext();
 
   PpuMode getMode() const;
   bool isLycEqualsLy() const;
@@ -31,11 +31,6 @@ class Dot {
   u16 getLowTileDataAddressOffset();
   u16 getHighTileDataAddressOffset();
 
-  bool requestsOamScanInterrupt();
-  bool requestsHBlankInterrupt();
-  bool requestsVBlankInterrupt();
-  bool requestsLycEqualsLyInterrupt();
-  bool fetch();
   bool discardsCurrentPixel();
 
  private:
@@ -47,7 +42,6 @@ class Dot {
   u8 wy = 0;
   u8 wx = 0;
 
-  bool requestInterrupt = false;
   u8 num_unused_pixels = 0;
 };
 }  // namespace gbemu
