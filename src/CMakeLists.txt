@@ -19,6 +19,7 @@ add_library(
     core/bus/bus.cc
     core/bus/bus_impl.cc
     core/interrupt/interrupt_controller.cc
+    core/interrupt/interrupt_controller_impl.cc
     core/register/register.cc
     core/memory/mbc.cc
     core/memory/ram.cc

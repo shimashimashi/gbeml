@@ -21,7 +21,7 @@ u8 BusImpl::read(u16 addr) const {
     fprintf(stderr, "Address %x is not usable\n", addr);
     return 0x00;
   } else if (addr == 0xff0f) {
-    return ic->readIf();
+    return ic->readInterruptFlag();
   } else if (addr == 0xff40) {
     return ppu->readLcdc();
   } else if (addr == 0xff41) {
@@ -52,7 +52,7 @@ u8 BusImpl::read(u16 addr) const {
   } else if (addr <= 0xfffe) {
     return hram->read(addr - 0xff80);
   } else if (addr == 0xffff) {
-    return ic->readIe();
+    return ic->readInterruptEnable();
   } else {
     fprintf(stderr, "Not implemented to read %x\n", addr);
     return 0x00;
@@ -75,7 +75,7 @@ void BusImpl::write(u16 addr, u8 value) {
   } else if (addr <= 0xfeff) {
     fprintf(stderr, "Address %x is not usable\n", addr);
   } else if (addr == 0xff0f) {
-    ic->writeIf(value);
+    ic->writeInterruptFlag(value);
   } else if (addr == 0xff40) {
     ppu->writeLcdc(value);
   } else if (addr == 0xff41) {
@@ -105,7 +105,7 @@ void BusImpl::write(u16 addr, u8 value) {
   } else if (addr <= 0xfffe) {
     hram->write(addr - 0xff80, value);
   } else if (addr == 0xffff) {
-    ic->writeIe(value);
+    ic->writeInterruptEnable(value);
   } else {
     fprintf(stderr, "Not implemented to write %x\n", addr);
   }

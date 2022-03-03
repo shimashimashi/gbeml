@@ -1,6 +1,7 @@
 #include "gameboy.h"
 
 #include "core/bus/bus_impl.h"
+#include "core/interrupt/interrupt_controller_impl.h"
 #include "core/memory/ram_impl.h"
 
 namespace gbemu {
@@ -12,7 +13,7 @@ void GameBoy::tick() {
 }
 
 bool GameBoy::init(const std::string& filename) {
-  ic = new InterruptController(0xe1, 0x00);
+  ic = new InterruptControllerImpl(0xe1, 0x00);
 
   rom = new Rom();
   rom->load(filename);

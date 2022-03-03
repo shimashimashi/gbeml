@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "core/bus/bus.h"
-#include "core/interrupt/interrupt_controller.h"
+#include "core/interrupt/interrupt_controller_impl.h"
 #include "core/types/types.h"
 
 namespace gbemu {
@@ -26,7 +26,7 @@ void expectCycles(u8 n, Cpu* cpu) {
 
 TEST(CpuTest, nop) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x00));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -36,7 +36,7 @@ TEST(CpuTest, nop) {
 
 TEST(CpuTest, load_bc_n16) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x01));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x12));
@@ -49,7 +49,7 @@ TEST(CpuTest, load_bc_n16) {
 
 TEST(CpuTest, load_de_n16) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x11));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x12));
@@ -62,7 +62,7 @@ TEST(CpuTest, load_de_n16) {
 
 TEST(CpuTest, load_hl_n16) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x21));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x12));
@@ -75,7 +75,7 @@ TEST(CpuTest, load_hl_n16) {
 
 TEST(CpuTest, load_sp_n16) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x31));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x12));
@@ -88,7 +88,7 @@ TEST(CpuTest, load_sp_n16) {
 
 TEST(CpuTest, load_bc_a) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x02));
   EXPECT_CALL(bus, write(0xffff, 0x11)).Times(1);
 
@@ -101,7 +101,7 @@ TEST(CpuTest, load_bc_a) {
 
 TEST(CpuTest, load_de_a) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x12));
   EXPECT_CALL(bus, write(0xffff, 0x11)).Times(1);
 
@@ -114,7 +114,7 @@ TEST(CpuTest, load_de_a) {
 
 TEST(CpuTest, load_hl_a_inc) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x22));
   EXPECT_CALL(bus, write(0xffff, 0x11)).Times(1);
 
@@ -128,7 +128,7 @@ TEST(CpuTest, load_hl_a_inc) {
 
 TEST(CpuTest, load_hl_a_dec) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x32));
   EXPECT_CALL(bus, write(0xffff, 0x11)).Times(1);
 
@@ -142,7 +142,7 @@ TEST(CpuTest, load_hl_a_dec) {
 
 TEST(CpuTest, inc_r16) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x03));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -154,7 +154,7 @@ TEST(CpuTest, inc_r16) {
 
 TEST(CpuTest, inc_r8) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x04));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -166,7 +166,7 @@ TEST(CpuTest, inc_r8) {
 
 TEST(CpuTest, dec_r8) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x15));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -178,7 +178,7 @@ TEST(CpuTest, dec_r8) {
 
 TEST(CpuTest, load_r_n8) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x0e));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0xff));
 
@@ -190,7 +190,7 @@ TEST(CpuTest, load_r_n8) {
 
 TEST(CpuTest, rlca) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x07));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -202,7 +202,7 @@ TEST(CpuTest, rlca) {
 
 TEST(CpuTest, load_n16_sp) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x08));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x12));
@@ -217,7 +217,7 @@ TEST(CpuTest, load_n16_sp) {
 
 TEST(CpuTest, add_hl_r) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x09));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -230,7 +230,7 @@ TEST(CpuTest, add_hl_r) {
 
 TEST(CpuTest, load_a_bc) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x0a));
   EXPECT_CALL(bus, read(0xffff)).WillOnce(testing::Return(0x34));
 
@@ -243,7 +243,7 @@ TEST(CpuTest, load_a_bc) {
 
 TEST(CpuTest, load_a_de) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x1a));
   EXPECT_CALL(bus, read(0xffff)).WillOnce(testing::Return(0x34));
 
@@ -256,7 +256,7 @@ TEST(CpuTest, load_a_de) {
 
 TEST(CpuTest, load_a_hl_inc) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x2a));
   EXPECT_CALL(bus, read(0xfffe)).WillOnce(testing::Return(0x34));
 
@@ -270,7 +270,7 @@ TEST(CpuTest, load_a_hl_inc) {
 
 TEST(CpuTest, load_a_hl_dec) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x3a));
   EXPECT_CALL(bus, read(0xffff)).WillOnce(testing::Return(0x34));
 
@@ -284,7 +284,7 @@ TEST(CpuTest, load_a_hl_dec) {
 
 TEST(CpuTest, dec_r16) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x0b));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -296,7 +296,7 @@ TEST(CpuTest, dec_r16) {
 
 TEST(CpuTest, rrca) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x0f));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -308,7 +308,7 @@ TEST(CpuTest, rrca) {
 
 TEST(CpuTest, rla) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x17));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -321,7 +321,7 @@ TEST(CpuTest, rla) {
 
 TEST(CpuTest, jr_n_pos) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x18));
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x04));
 
@@ -334,7 +334,7 @@ TEST(CpuTest, jr_n_pos) {
 
 TEST(CpuTest, jr_n_neg) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x18));
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0xfe));
 
@@ -347,7 +347,7 @@ TEST(CpuTest, jr_n_neg) {
 
 TEST(CpuTest, rra) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x1f));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -360,7 +360,7 @@ TEST(CpuTest, rra) {
 
 TEST(CpuTest, jr_cc_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x20));
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0xfe));
 
@@ -373,7 +373,7 @@ TEST(CpuTest, jr_cc_n) {
 
 TEST(CpuTest, daa) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x27));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -385,7 +385,7 @@ TEST(CpuTest, daa) {
 
 TEST(CpuTest, cpl) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x2f));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -397,7 +397,7 @@ TEST(CpuTest, cpl) {
 
 TEST(CpuTest, scf) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x37));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -408,7 +408,7 @@ TEST(CpuTest, scf) {
 
 TEST(CpuTest, ccf) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0x3f));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x3f));
 
@@ -423,7 +423,7 @@ TEST(CpuTest, ccf) {
 
 TEST(CpuTest, load_e_h) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b01011100));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -436,7 +436,7 @@ TEST(CpuTest, load_e_h) {
 
 TEST(CpuTest, add_a_l) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b10000101));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -449,7 +449,7 @@ TEST(CpuTest, add_a_l) {
 
 TEST(CpuTest, addc_a_r) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b10001000));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -463,7 +463,7 @@ TEST(CpuTest, addc_a_r) {
 
 TEST(CpuTest, sub_a_r) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b10010000));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -476,7 +476,7 @@ TEST(CpuTest, sub_a_r) {
 
 TEST(CpuTest, subc_a_r) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b10011000));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -490,7 +490,7 @@ TEST(CpuTest, subc_a_r) {
 
 TEST(CpuTest, and_a_r) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b10100000));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -503,7 +503,7 @@ TEST(CpuTest, and_a_r) {
 
 TEST(CpuTest, xor_a_r) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b10101000));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -516,7 +516,7 @@ TEST(CpuTest, xor_a_r) {
 
 TEST(CpuTest, or_a_r) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b10110000));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -529,7 +529,7 @@ TEST(CpuTest, or_a_r) {
 
 TEST(CpuTest, cp_a_r) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b10111000));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -542,7 +542,7 @@ TEST(CpuTest, cp_a_r) {
 
 TEST(CpuTest, ret_cc) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11011000));
   EXPECT_CALL(bus, read(0xfe)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(0xff)).WillOnce(testing::Return(0x12));
@@ -557,7 +557,7 @@ TEST(CpuTest, ret_cc) {
 
 TEST(CpuTest, pop) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11000001));
   EXPECT_CALL(bus, read(0xfe)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(0xff)).WillOnce(testing::Return(0x12));
@@ -571,7 +571,7 @@ TEST(CpuTest, pop) {
 
 TEST(CpuTest, pop_af) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11110001));
   EXPECT_CALL(bus, read(0xfe)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(0xff)).WillOnce(testing::Return(0x12));
@@ -585,7 +585,7 @@ TEST(CpuTest, pop_af) {
 
 TEST(CpuTest, jp_cc_n16) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11010010));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x12));
@@ -599,7 +599,7 @@ TEST(CpuTest, jp_cc_n16) {
 
 TEST(CpuTest, jp_n16) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11000011));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x12));
@@ -612,7 +612,7 @@ TEST(CpuTest, jp_n16) {
 
 TEST(CpuTest, call_cc_n16) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11001100));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x12));
@@ -629,7 +629,7 @@ TEST(CpuTest, call_cc_n16) {
 
 TEST(CpuTest, push) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11010101));
   EXPECT_CALL(bus, write(0xfffc, 0x34)).Times(1);
   EXPECT_CALL(bus, write(0xfffd, 0x12)).Times(1);
@@ -643,7 +643,7 @@ TEST(CpuTest, push) {
 
 TEST(CpuTest, push_hl) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11100101));
   EXPECT_CALL(bus, write(0xfffc, 0x34)).Times(1);
   EXPECT_CALL(bus, write(0xfffd, 0x12)).Times(1);
@@ -657,7 +657,7 @@ TEST(CpuTest, push_hl) {
 
 TEST(CpuTest, add_a_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11000110));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(1));
 
@@ -670,7 +670,7 @@ TEST(CpuTest, add_a_n) {
 
 TEST(CpuTest, rst_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11001111));
   EXPECT_CALL(bus, write(0xfffc, 1)).Times(1);
   EXPECT_CALL(bus, write(0xfffd, 0)).Times(1);
@@ -684,7 +684,7 @@ TEST(CpuTest, rst_n) {
 
 TEST(CpuTest, ret) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11001001));
   EXPECT_CALL(bus, read(0xfffe)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(0xffff)).WillOnce(testing::Return(0x12));
@@ -698,7 +698,7 @@ TEST(CpuTest, ret) {
 
 TEST(CpuTest, call_n16) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11001101));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x12));
@@ -714,7 +714,7 @@ TEST(CpuTest, call_n16) {
 
 TEST(CpuTest, addc_a_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11001110));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0xfe));
 
@@ -727,7 +727,7 @@ TEST(CpuTest, addc_a_n) {
 
 TEST(CpuTest, sub_a_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11010110));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0xfe));
 
@@ -740,7 +740,7 @@ TEST(CpuTest, sub_a_n) {
 
 TEST(CpuTest, reti) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11011001));
   EXPECT_CALL(bus, read(0xfffe)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(0xffff)).WillOnce(testing::Return(0x12));
@@ -755,7 +755,7 @@ TEST(CpuTest, reti) {
 
 TEST(CpuTest, subc_a_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11011110));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0xfe));
 
@@ -769,7 +769,7 @@ TEST(CpuTest, subc_a_n) {
 
 TEST(CpuTest, load_n_a) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11100000));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0xff));
   EXPECT_CALL(bus, write(0xffff, 0x11)).Times(1);
@@ -782,7 +782,7 @@ TEST(CpuTest, load_n_a) {
 
 TEST(CpuTest, load_c_a) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11100010));
   EXPECT_CALL(bus, write(0xffff, 0x11)).Times(1);
 
@@ -795,7 +795,7 @@ TEST(CpuTest, load_c_a) {
 
 TEST(CpuTest, and_a_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11100110));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0b11111110));
 
@@ -808,7 +808,7 @@ TEST(CpuTest, and_a_n) {
 
 TEST(CpuTest, add_sp_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11101000));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0xff));
 
@@ -821,7 +821,7 @@ TEST(CpuTest, add_sp_n) {
 
 TEST(CpuTest, jp_hl) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11101001));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -834,7 +834,7 @@ TEST(CpuTest, jp_hl) {
 
 TEST(CpuTest, load_n16_a) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11101010));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x12));
@@ -848,7 +848,7 @@ TEST(CpuTest, load_n16_a) {
 
 TEST(CpuTest, xor_a_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11101110));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0b10101010));
 
@@ -861,7 +861,7 @@ TEST(CpuTest, xor_a_n) {
 
 TEST(CpuTest, load_a_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11110000));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0xff));
   EXPECT_CALL(bus, read(0xffff)).WillOnce(testing::Return(0x11));
@@ -874,7 +874,7 @@ TEST(CpuTest, load_a_n) {
 
 TEST(CpuTest, load_a_c) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11110010));
   EXPECT_CALL(bus, read(0xffff)).WillOnce(testing::Return(0x11));
 
@@ -887,7 +887,7 @@ TEST(CpuTest, load_a_c) {
 
 TEST(CpuTest, di) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11110011));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -898,7 +898,7 @@ TEST(CpuTest, di) {
 
 TEST(CpuTest, or_a_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11110110));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0xf0));
 
@@ -911,7 +911,7 @@ TEST(CpuTest, or_a_n) {
 
 TEST(CpuTest, load_hl_sp_n8) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11111000));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0xff));
 
@@ -925,7 +925,7 @@ TEST(CpuTest, load_hl_sp_n8) {
 
 TEST(CpuTest, load_sp_hl) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11111001));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -938,7 +938,7 @@ TEST(CpuTest, load_sp_hl) {
 
 TEST(CpuTest, load_a_n16) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11111010));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x34));
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x12));
@@ -953,7 +953,7 @@ TEST(CpuTest, load_a_n16) {
 
 TEST(CpuTest, ei) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11111011));
 
   Cpu* cpu = new Cpu(&bus, &ic);
@@ -964,7 +964,7 @@ TEST(CpuTest, ei) {
 
 TEST(CpuTest, rlc_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0xcb));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0b00000111));
 
@@ -978,7 +978,7 @@ TEST(CpuTest, rlc_n) {
 
 TEST(CpuTest, rrc_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0xcb));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0b00001000));
 
@@ -992,7 +992,7 @@ TEST(CpuTest, rrc_n) {
 
 TEST(CpuTest, rl_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0xcb));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0b00010000));
 
@@ -1006,7 +1006,7 @@ TEST(CpuTest, rl_n) {
 
 TEST(CpuTest, rr_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0xcb));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0b00011000));
 
@@ -1020,7 +1020,7 @@ TEST(CpuTest, rr_n) {
 
 TEST(CpuTest, sla_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0xcb));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0b00100000));
 
@@ -1034,7 +1034,7 @@ TEST(CpuTest, sla_n) {
 
 TEST(CpuTest, sra_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0xcb));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0b00101000));
 
@@ -1048,7 +1048,7 @@ TEST(CpuTest, sra_n) {
 
 TEST(CpuTest, swap) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0xcb));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0b00110000));
 
@@ -1061,7 +1061,7 @@ TEST(CpuTest, swap) {
 
 TEST(CpuTest, srl_n) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0xcb));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0b00111000));
 
@@ -1075,7 +1075,7 @@ TEST(CpuTest, srl_n) {
 
 TEST(CpuTest, bit_b_r) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0xcb));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0b01100000));
 
@@ -1088,7 +1088,7 @@ TEST(CpuTest, bit_b_r) {
 
 TEST(CpuTest, res_b_r) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0xcb));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0b10100000));
 
@@ -1101,7 +1101,7 @@ TEST(CpuTest, res_b_r) {
 
 TEST(CpuTest, set_b_r) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0xcb));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0b11100000));
 
@@ -1114,7 +1114,7 @@ TEST(CpuTest, set_b_r) {
 
 TEST(CpuTest, set_b_hl) {
   MockBus bus;
-  InterruptController ic;
+  InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0xcb));
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0b11100110));
   EXPECT_CALL(bus, read(0x1234)).WillOnce(testing::Return(0));
