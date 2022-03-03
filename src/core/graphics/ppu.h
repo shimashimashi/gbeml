@@ -98,6 +98,8 @@ class Ppu {
   void writeObp0(u8 value);
   void writeObp1(u8 value);
 
+  PpuMode getMode();
+
  private:
   Display* display;
   Ram* vram;
@@ -116,14 +118,16 @@ class Ppu {
   u8 scx = 0;
   u8 ly = 0;
   u8 lyc = 0;
-  u16 lx = 0;
   u8 wy = 0;
   u8 wx = 0;
-  u8 x = 0;
+
+  u8 fetcher_x = 0;
+  u8 shifter_x = 0;
 
   u64 stalls = 0;
-  u64 fetch_stalls = 0;
+  u64 fetcher_stalls = 0;
   u8 num_unused_pixels = 0;
+  u64 cycles = 0;
 
   void draw();
   void fetchPixels();

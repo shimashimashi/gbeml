@@ -76,31 +76,27 @@ void Ppu::tick() {
 }
 
 void Ppu::moveNext() {
-  if (stalls > 0) {
-    stalls--;
-    return;
-  }
-
-  if (++lx == 456) {
-    lx = 0;
+  if (++cycles % 456 == 0) {
     if (++ly == 154) {
       ly = 0;
     }
   }
 
+  cycles %= 456 * 154;
+
   switch (mode) {
     case PpuMode::OamScan:
-      if (lx == 80) {
+      if (cycles % 456 == 80) {
         enterDrawing();
       }
       break;
     case PpuMode::Drawing:
-      if (x == 160) {
+      if (shifter_x == 160) {
         enterHBlank();
       }
       break;
     case PpuMode::HBlank:
-      if (lx == 0) {
+      if (cycles % 456 == 0) {
         if (ly == 144) {
           enterVBlank();
         } else {
@@ -118,14 +114,15 @@ void Ppu::moveNext() {
 
 void Ppu::draw() {
   if (stalls > 0) {
+    stalls--;
     return;
   }
 
-  if (fetch_stalls > 0) {
-    fetch_stalls--;
+  if (fetcher_stalls > 0) {
+    fetcher_stalls--;
   } else {
     fetchPixels();
-    fetch_stalls += 7;
+    fetcher_stalls += 7;
   }
 
   if (background_fifo.size() > 0) {
@@ -134,7 +131,7 @@ void Ppu::draw() {
 }
 
 u8 Ppu::getBackgroundTileNumber() {
-  u8 x = ((scx + lx - 80) & 0xff) / 8;
+  u8 x = ((scx + fetcher_x) & 0xff) / 8;
   u8 y = ((scy + ly) & 0xff) / 8;
   u16 offset = (x + y * 32) & 0x3ff;
   u16 addr = lcdc.getBackgroundTileMapAddress(offset);
@@ -158,9 +155,11 @@ void Ppu::fetchPixels() {
   VLOG(1) << "tile_number: " << (int)tile_number << std::endl;
 
   u8 low = getBackgroundLowTileData(tile_number);
-  u8 high = getBackgroundLowTileData(tile_number);
+  u8 high = getBackgroundHighTileData(tile_number);
 
   background_fifo.pushTileData(low, high);
+
+  fetcher_x += 8;
 }
 
 void Ppu::shiftPixel() {
@@ -171,8 +170,7 @@ void Ppu::shiftPixel() {
     return;
   }
 
-  display->render(x, ly, pixel);
-  x++;
+  display->render(shifter_x++, ly, pixel);
 }
 
 void Ppu::init() {
@@ -195,13 +193,18 @@ void Ppu::enterOamScan() {
 
 void Ppu::enterDrawing() {
   mode = PpuMode::Drawing;
-  stalls = 5;
+  stalls = 12;
+  shifter_x = 0;
+  fetcher_x = 0;
+  fetchPixels();
   num_unused_pixels = scx % 8;
 }
 
 void Ppu::enterHBlank() {
   mode = PpuMode::HBlank;
-  x = 0;
+  while (background_fifo.size() > 0) {
+    background_fifo.popPixel();
+  }
 }
 
 void Ppu::enterVBlank() {
@@ -340,5 +343,7 @@ void Ppu::writeBgp(u8 value) { background_fifo.setPalette(value); }
 void Ppu::writeObp0(u8 value) { obp0.write(value); }
 
 void Ppu::writeObp1(u8 value) { obp1.write(value); }
+
+PpuMode Ppu::getMode() { return mode; }
 
 }  // namespace gbemu

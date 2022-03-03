@@ -8,30 +8,25 @@ namespace gbemu {
 
 class InterruptController {
  public:
-  InterruptController() : if_register(), ie_register() {}
-  InterruptController(u8 if_, u8 ie_) : if_register(if_), ie_register(ie_) {}
+  virtual ~InterruptController();
 
-  u8 readIf() const;
-  void writeIf(u8 value);
+  virtual u8 readInterruptFlag() const = 0;
+  virtual void writeInterruptFlag(u8 value) = 0;
 
-  u8 readIe() const;
-  void writeIe(u8 value);
+  virtual u8 readInterruptEnable() const = 0;
+  virtual void writeInterruptEnable(u8 value) = 0;
 
-  void signalVBlank();
-  void signalLcdStat();
+  virtual void signalVBlank() = 0;
+  virtual void signalLcdStat() = 0;
 
-  void clearVBlank();
-  void clearLcdStat();
+  virtual void clearVBlank() = 0;
+  virtual void clearLcdStat() = 0;
 
-  bool isVBlankEnabled();
-  bool isLcdStatEnabled();
+  virtual bool isVBlankEnabled() = 0;
+  virtual bool isLcdStatEnabled() = 0;
 
-  bool isVBlankRequested();
-  bool isLcdStatRequested();
-
- private:
-  Register if_register;
-  Register ie_register;
+  virtual bool isVBlankRequested() = 0;
+  virtual bool isLcdStatRequested() = 0;
 };
 
 }  // namespace gbemu
