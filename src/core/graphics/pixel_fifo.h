@@ -15,21 +15,16 @@ namespace gbemu {
 class PixelFifo {
  public:
   PixelFifo() : palette(0) {}
-  void pushLowTileData(u8 data);
-  void pushHighTileData(u8 data);
-  void popPixels(std::array<Color, 160>* pixels);
+  void pushTileData(u8 low, u8 high);
+  Color popPixel();
+  u64 size();
 
-  void setScx(u8 value);
   void setPalette(u8 value);
+  u8 getPalette() const;
 
  private:
   Palette palette;
-
-  std::queue<u8> low_pixel_data;
-  std::queue<u8> high_pixel_data;
-
-  u8 scx = 0;
-  u8 num_unused_pixels = 0;
+  std::queue<Color> pixels;
 };
 
 }  // namespace gbemu

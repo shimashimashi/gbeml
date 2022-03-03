@@ -11,7 +11,7 @@ namespace gbemu {
 class Display {
  public:
   virtual ~Display();
-  virtual void pushRow(u8 line, const std::array<Color, 160>& pixels) = 0;
+  virtual void render(u8 x, u8 y, Color pixel) = 0;
 };
 
 }  // namespace gbemu

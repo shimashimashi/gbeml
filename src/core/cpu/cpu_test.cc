@@ -17,7 +17,7 @@ class MockBus : public Bus {
 };
 
 void expectCycles(u8 n, Cpu* cpu) {
-  for (i64 i = 0; i < n; ++i) {
+  for (i64 i = 0; i < n - 1; ++i) {
     EXPECT_TRUE(cpu->stalled());
     cpu->tick();
   }

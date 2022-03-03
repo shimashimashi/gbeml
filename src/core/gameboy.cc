@@ -58,6 +58,7 @@ bool GameBoy::init(const std::string& filename) {
   ppu->writeWy(0x00);
   ppu->writeWx(0x00);
   ppu->writeBgp(0xfc);
+  ppu->init();
 
   return true;
 }

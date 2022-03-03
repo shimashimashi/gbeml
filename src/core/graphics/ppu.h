@@ -3,7 +3,6 @@
 
 #include "core/display/display.h"
 #include "core/graphics/color.h"
-#include "core/graphics/dot.h"
 #include "core/graphics/mode.h"
 #include "core/graphics/palette.h"
 #include "core/graphics/pixel_fifo.h"
@@ -28,8 +27,8 @@ class Lcdc {
   bool isBgEnabled() const;
 
   u16 windowTileMapArea() const;
-  u16 bgTileDataAddress(u8 offset) const;
-  u16 bgTileMapAddress(u16 offset) const;
+  u16 getBackgroundTileDataAddress(u8 tile_number) const;
+  u16 getBackgroundTileMapAddress(u16 offset) const;
   ObjSize objSize() const;
 
  private:
@@ -64,10 +63,10 @@ class Ppu {
         bgp(0),
         obp0(0),
         obp1(0),
-        dot(),
         background_fifo() {}
 
   void tick();
+  void init();
 
   u8 readVram(u16 addr) const;
   u8 readOam(u16 addr) const;
@@ -110,19 +109,35 @@ class Ppu {
   Palette bgp;
   Palette obp0;
   Palette obp1;
-  Dot dot;
   PixelFifo background_fifo;
+  PpuMode mode;
+
+  u8 scy = 0;
+  u8 scx = 0;
+  u8 ly = 0;
+  u8 lyc = 0;
+  u16 lx = 0;
+  u8 wy = 0;
+  u8 wx = 0;
+  u8 x = 0;
 
   u64 stalls = 0;
+  u64 fetch_stalls = 0;
+  u8 num_unused_pixels = 0;
 
-  void fetch();
-  void render();
+  void draw();
+  void fetchPixels();
+  void shiftPixel();
+  void moveNext();
 
-  u8 fetchTileNumber();
-  u8 fetchLowTileData();
-  u8 fetchHighTileData();
+  void enterOamScan();
+  void enterDrawing();
+  void enterHBlank();
+  void enterVBlank();
 
-  bool requestsLcdStat();
+  u8 getBackgroundTileNumber();
+  u8 getBackgroundLowTileData(u8 tile_number);
+  u8 getBackgroundHighTileData(u8 tile_number);
 };
 
 }  // namespace gbemu

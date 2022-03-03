@@ -30,7 +30,6 @@ add_library(
     core/graphics/palette.cc
     core/graphics/pixel_fifo.cc
     core/graphics/ppu.cc
-    core/graphics/dot.cc
     core/display/display.cc
 )
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
