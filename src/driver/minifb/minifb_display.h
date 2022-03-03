@@ -12,7 +12,7 @@ namespace gbemu {
 class MiniFbDisplay : public Display {
  public:
   MiniFbDisplay() {}
-  void pushRow(u8 y, const std::array<Color, 160>& pixels) override;
+  void render(u8 x, u8 y, Color pixel) override;
   u32* getBuffer();
 
  private:

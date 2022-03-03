@@ -56,6 +56,8 @@ void Cpu::tick() {
   u8 byte = fetch();
   Opcode opcode(byte);
   execute(opcode);
+
+  stalls--;
 }
 
 bool Cpu::stalled() { return stalls > 0; }
