@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <fstream>
 
-namespace gbemu {
+namespace gbeml {
 
 u8 Rom::read(const u16 addr) const {
   if (addr >= rom_size) {
@@ -198,4 +198,4 @@ void Rom::setCartridgeType(u8 code) {
   }
 }
 
-}  // namespace gbemu
+}  // namespace gbeml

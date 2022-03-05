@@ -1,6 +1,6 @@
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 u16 concat(u8 h, u8 l) {
   u16 n = h;
@@ -9,4 +9,4 @@ u16 concat(u8 h, u8 l) {
   return n;
 }
 
-}  // namespace gbemu
+}  // namespace gbeml

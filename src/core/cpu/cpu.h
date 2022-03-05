@@ -1,5 +1,5 @@
-#ifndef GBEMU_CPU_H_
-#define GBEMU_CPU_H_
+#ifndef GBEML_CPU_H_
+#define GBEML_CPU_H_
 
 #include <string>
 
@@ -10,7 +10,7 @@
 #include "core/register/register.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class Cpu {
  public:
@@ -255,6 +255,6 @@ class Cpu {
   void call(u16 addr);
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_CPU_H_
+#endif  // GBEML_CPU_H_

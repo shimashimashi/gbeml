@@ -1,12 +1,12 @@
-#ifndef GBEMU_DISPLAY_H_
-#define GBEMU_DISPLAY_H_
+#ifndef GBEML_DISPLAY_H_
+#define GBEML_DISPLAY_H_
 
 #include <array>
 
 #include "core/graphics/color.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class Display {
  public:
@@ -14,6 +14,6 @@ class Display {
   virtual void render(u8 x, u8 y, Color pixel) = 0;
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_DISPLAY_H_
+#endif  // GBEML_DISPLAY_H_

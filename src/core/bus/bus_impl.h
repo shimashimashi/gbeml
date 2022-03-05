@@ -1,5 +1,5 @@
-#ifndef GBEMU_BUS_IMPL_H_
-#define GBEMU_BUS_IMPL_H_
+#ifndef GBEML_BUS_IMPL_H_
+#define GBEML_BUS_IMPL_H_
 
 #include "core/bus/bus.h"
 #include "core/graphics/ppu.h"
@@ -8,7 +8,7 @@
 #include "core/memory/ram.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class BusImpl : public Bus {
  public:
@@ -36,6 +36,6 @@ class BusImpl : public Bus {
   void transfer();
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_BUS_IMPL_H_
+#endif  // GBEML_BUS_IMPL_H_

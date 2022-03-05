@@ -1,5 +1,5 @@
-#ifndef GBEMU_PPU_H_
-#define GBEMU_PPU_H_
+#ifndef GBEML_PPU_H_
+#define GBEML_PPU_H_
 
 #include "core/display/display.h"
 #include "core/graphics/color.h"
@@ -10,7 +10,7 @@
 #include "core/memory/ram.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 enum class ObjSize { Normal, Tall };
 
@@ -144,6 +144,6 @@ class Ppu {
   u8 getBackgroundHighTileData(u8 tile_number);
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_PPU_H_
+#endif  // GBEML_PPU_H_

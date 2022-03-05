@@ -1,6 +1,6 @@
 #include "core/graphics/pixel_fifo.h"
 
-namespace gbemu {
+namespace gbeml {
 
 void PixelFifo::pushTileData(u8 low, u8 high) {
   for (i8 i = 7; i >= 0; --i) {
@@ -26,4 +26,4 @@ Color PixelFifo::popPixel() {
 
 u64 PixelFifo::size() { return pixels.size(); }
 
-}  // namespace gbemu
+}  // namespace gbeml

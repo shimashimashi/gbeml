@@ -1,10 +1,10 @@
-#ifndef GBEMU_INTERRUPT_CONTROLLER_H_
-#define GBEMU_INTERRUPT_CONTROLLER_H_
+#ifndef GBEML_INTERRUPT_CONTROLLER_H_
+#define GBEML_INTERRUPT_CONTROLLER_H_
 
 #include "core/register/register.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class InterruptController {
  public:
@@ -29,6 +29,6 @@ class InterruptController {
   virtual bool isLcdStatRequested() = 0;
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_INTERRUPT_CONTROLLER_H_
+#endif  // GBEML_INTERRUPT_CONTROLLER_H_

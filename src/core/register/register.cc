@@ -2,7 +2,7 @@
 
 #include <cstdio>
 
-namespace gbemu {
+namespace gbeml {
 
 u8 Register::get() const { return value; }
 
@@ -53,4 +53,4 @@ void RegisterPair::increment() { set(get() + 1); }
 
 void RegisterPair::decrement() { set(get() - 1); }
 
-}  // namespace gbemu
+}  // namespace gbeml

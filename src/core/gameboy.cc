@@ -4,7 +4,7 @@
 #include "core/interrupt/interrupt_controller_impl.h"
 #include "core/memory/ram_impl.h"
 
-namespace gbemu {
+namespace gbeml {
 
 void GameBoy::tick() {
   cpu->tick();
@@ -64,4 +64,4 @@ bool GameBoy::init(const std::string& filename) {
   return true;
 }
 
-}  // namespace gbemu
+}  // namespace gbeml

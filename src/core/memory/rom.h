@@ -1,12 +1,12 @@
-#ifndef GBEMU_ROM_H_
-#define GBEMU_ROM_H_
+#ifndef GBEML_ROM_H_
+#define GBEML_ROM_H_
 
 #include <string>
 #include <vector>
 
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 enum class CartridgeType { RomOnly, Mbc1 };
 
@@ -42,6 +42,6 @@ class Rom {
   std::vector<u8> data;
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_ROM_H_
+#endif  // GBEML_ROM_H_

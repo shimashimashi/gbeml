@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cstdio>
 
-namespace gbemu {
+namespace gbeml {
 
 Mbc::~Mbc() {}
 
@@ -96,4 +96,4 @@ u64 Mbc1::calcRamAddress(const u16 addr) const {
   return base + addr - 0xa000;
 }
 
-}  // namespace gbemu
+}  // namespace gbeml

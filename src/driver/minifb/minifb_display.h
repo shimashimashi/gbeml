@@ -1,5 +1,5 @@
-#ifndef GBEMU_MINIFB_DISPLAY_H_
-#define GBEMU_MINIFB_DISPLAY_H_
+#ifndef GBEML_MINIFB_DISPLAY_H_
+#define GBEML_MINIFB_DISPLAY_H_
 
 #include <array>
 
@@ -7,7 +7,7 @@
 #include "core/graphics/color.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class MiniFbDisplay : public Display {
  public:
@@ -19,6 +19,6 @@ class MiniFbDisplay : public Display {
   u32 buffer[160 * 144];
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_MINIFB_DISPLAY_H_
+#endif  // GBEML_MINIFB_DISPLAY_H_

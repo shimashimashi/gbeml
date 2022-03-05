@@ -2,7 +2,7 @@
 
 #include "glog/logging.h"
 
-namespace gbemu {
+namespace gbeml {
 
 void MiniFbDisplay::render(u8 x, u8 y, Color pixel) {
   u32 rgb;
@@ -26,4 +26,4 @@ void MiniFbDisplay::render(u8 x, u8 y, Color pixel) {
 
 u32* MiniFbDisplay::getBuffer() { return buffer; }
 
-}  // namespace gbemu
+}  // namespace gbeml

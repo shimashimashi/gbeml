@@ -2,7 +2,7 @@
 
 #include <cstdio>
 
-namespace gbemu {
+namespace gbeml {
 
 u8 Opcode::get() const { return value.get(); }
 
@@ -19,4 +19,4 @@ bool Opcode::match(const std::string& pattern) const {
 
 u8 Opcode::slice(u8 from, u8 to) const { return value.slice(from, to); }
 
-}  // namespace gbemu
+}  // namespace gbeml

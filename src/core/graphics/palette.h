@@ -1,11 +1,11 @@
-#ifndef GBEMU_PALETTE_H_
-#define GBEMU_PALETTE_H_
+#ifndef GBEML_PALETTE_H_
+#define GBEML_PALETTE_H_
 
 #include "core/graphics/color.h"
 #include "core/register/register.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class Palette {
  public:
@@ -19,6 +19,6 @@ class Palette {
   Register data;
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_PALETTE_H_
+#endif  // GBEML_PALETTE_H_

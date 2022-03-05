@@ -1,12 +1,12 @@
-#ifndef GBEMU_RAM_IMPL_H_
-#define GBEMU_RAM_IMPL_H_
+#ifndef GBEML_RAM_IMPL_H_
+#define GBEML_RAM_IMPL_H_
 
 #include <vector>
 
 #include "core/memory/ram.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class RamImpl : public Ram {
  public:
@@ -19,6 +19,6 @@ class RamImpl : public Ram {
   std::vector<u8> data;
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_RAM_IMPL_H_
+#endif  // GBEML_RAM_IMPL_H_

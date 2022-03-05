@@ -7,7 +7,7 @@
 #include "core/interrupt/interrupt_controller_impl.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class MockBus : public Bus {
  public:
@@ -1126,4 +1126,4 @@ TEST(CpuTest, set_b_hl) {
   expectCycles(16, cpu);
 }
 
-}  // namespace gbemu
+}  // namespace gbeml

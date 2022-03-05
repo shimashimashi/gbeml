@@ -1,11 +1,11 @@
-#ifndef GBEMU_ALU_H_
-#define GBEMU_ALU_H_
+#ifndef GBEML_ALU_H_
+#define GBEML_ALU_H_
 
 #include "core/bus/bus.h"
 #include "core/register/register.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class Alu {
  public:
@@ -80,6 +80,6 @@ class Alu {
   u8 resetBit(u8 n, u8 i);
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_ALU_H_
+#endif  // GBEML_ALU_H_

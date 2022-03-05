@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-namespace gbemu {
+namespace gbeml {
 
 TEST(OpcodeTest, get) {
   Opcode opcode(0xff);
@@ -25,4 +25,4 @@ TEST(OpcodeTest, slice) {
   EXPECT_EQ(0b1100, opcode.slice(4, 7));
 }
 
-}  // namespace gbemu
+}  // namespace gbeml

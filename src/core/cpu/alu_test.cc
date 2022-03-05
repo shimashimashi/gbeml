@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-namespace gbemu {
+namespace gbeml {
 
 TEST(AluTest, add_n_setsZFlagIfResultIsZero) {
   RegisterPair af;
@@ -392,4 +392,4 @@ TEST(AluTest, daa_decimalAdjustAfterSubtraction) {
   EXPECT_EQ(false, alu.get_z());
 }
 
-}  // namespace gbemu
+}  // namespace gbeml

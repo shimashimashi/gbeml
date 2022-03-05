@@ -1,12 +1,12 @@
-#ifndef GBEMU_OPCODE_H_
-#define GBEMU_OPCODE_H_
+#ifndef GBEML_OPCODE_H_
+#define GBEML_OPCODE_H_
 
 #include <string>
 
 #include "core/register/register.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class Opcode {
  public:
@@ -20,6 +20,6 @@ class Opcode {
   Register value;
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_OPCODE_H_
+#endif  // GBEML_OPCODE_H_

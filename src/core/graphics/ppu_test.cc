@@ -10,7 +10,7 @@
 #include "core/memory/ram.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class MockDisplay : public Display {
  public:
@@ -96,4 +96,4 @@ TEST(PpuTest, moveNext) {
   EXPECT_EQ(PpuMode::OamScan, ppu.getMode());
 }
 
-}  // namespace gbemu
+}  // namespace gbeml

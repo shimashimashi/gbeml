@@ -2,7 +2,7 @@
 
 #include <cstdio>
 
-namespace gbemu {
+namespace gbeml {
 
 void MiniFbEvents::active(struct mfb_window *window, bool isActive) {
   const char *window_title = "";
@@ -137,4 +137,4 @@ bool MiniFbWindow::update(u32 *buffer) {
   return state == STATE_OK;
 }
 
-}  // namespace gbemu
+}  // namespace gbeml

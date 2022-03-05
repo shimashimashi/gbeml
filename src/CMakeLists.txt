@@ -13,7 +13,7 @@ FetchContent_Declare(glog
 FetchContent_MakeAvailable(glog)
 
 add_library(
-    gbemu_core SHARED
+    gbeml_core SHARED
     core/gameboy.cc
     core/types/types.cc
     core/bus/bus.cc
@@ -35,36 +35,36 @@ add_library(
 )
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     target_compile_options(
-        gbemu_core PRIVATE
+        gbeml_core PRIVATE
         # -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded
         -Werror -Wall -Wextra
         --coverage
     )
 else()
     target_compile_options(
-        gbemu_core PRIVATE
+        gbeml_core PRIVATE
         -Werror -Wall -Wextra -Wno-return-type
         --coverage
     )
 endif()
 target_link_libraries(
-    gbemu_core
+    gbeml_core
     glog
 )
-target_link_options(gbemu_core PRIVATE --coverage)
-target_include_directories(gbemu_core PUBLIC .)
+target_link_options(gbeml_core PRIVATE --coverage)
+target_include_directories(gbeml_core PUBLIC .)
 
 add_executable(
-    gbemu
+    gbeml
     main.cc
     driver/minifb/minifb_display.cc
     driver/minifb/minifb_window.cc
 )
-target_link_libraries(gbemu gbemu_core minifb)
-target_compile_options(gbemu PRIVATE)
+target_link_libraries(gbeml gbeml_core minifb)
+target_compile_options(gbeml PRIVATE)
 
 add_executable(
-    gbemu_test
+    gbeml_test
     core/types/types_test.cc
     core/register/register_test.cc
     core/cpu/alu_test.cc
@@ -73,18 +73,18 @@ add_executable(
     core/graphics/ppu_test.cc
 )
 target_link_libraries(
-    gbemu_test
-    gbemu_core
+    gbeml_test
+    gbeml_core
     gtest_main
     gmock_main
 )
-target_compile_options(gbemu_test PRIVATE)
-add_dependencies(gbemu_test clean_gcda)
+target_compile_options(gbeml_test PRIVATE)
+add_dependencies(gbeml_test clean_gcda)
 
 include(GoogleTest)
 gtest_discover_tests(
-    gbemu_test
-    PROPERTIES LABELS gbemu
+    gbeml_test
+    PROPERTIES LABELS gbeml
 )
 
 add_custom_target(
@@ -95,10 +95,10 @@ add_custom_target(
 
 add_custom_target(
   coverage
-  DEPENDS gbemu_test
+  DEPENDS gbeml_test
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   COMMAND lcov --rc lcov_branch_coverage=1 -c -i -d src/CMakeFiles -o coverage_base.info > lcov.log 2>&1
-  COMMAND ctest -L gbemu -j 8
+  COMMAND ctest -L gbeml -j 8
   COMMAND lcov --rc lcov_branch_coverage=1 -d src/CMakeFiles -c -o coverage_test.info > lcov.log 2>&1
   COMMAND lcov --rc lcov_branch_coverage=1 -a coverage_base.info -a coverage_test.info -o coverage_all.info > lcov.log 2>&1
   COMMAND lcov --rc lcov_branch_coverage=1 -r coverage_all.info *_test.cc *gtest* */usr/include/c++/v1/* *glog* -o coverage.info >> lcov.log 2>&1

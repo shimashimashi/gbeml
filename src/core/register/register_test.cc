@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-namespace gbemu {
+namespace gbeml {
 
 TEST(RegisterTest, get) {
   Register r(0xff);
@@ -87,4 +87,4 @@ TEST(RegisterPairTest, getLow) {
   EXPECT_EQ(1, rp.getLow()->get());
 }
 
-}  // namespace gbemu
+}  // namespace gbeml

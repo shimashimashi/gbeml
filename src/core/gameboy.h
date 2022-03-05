@@ -1,5 +1,5 @@
-#ifndef GBEMU_GAMEBOY_H_
-#define GBEMU_GAMEBOY_H_
+#ifndef GBEML_GAMEBOY_H_
+#define GBEML_GAMEBOY_H_
 
 #include <string>
 
@@ -12,7 +12,7 @@
 #include "core/memory/ram.h"
 #include "core/memory/rom.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class GameBoy {
  public:
@@ -34,6 +34,6 @@ class GameBoy {
   InterruptController* ic;
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_GAMEBOY_H_
+#endif  // GBEML_GAMEBOY_H_

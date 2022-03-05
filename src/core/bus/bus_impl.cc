@@ -2,7 +2,7 @@
 
 #include <cstdio>
 
-namespace gbemu {
+namespace gbeml {
 
 u8 BusImpl::read(u16 addr) const {
   if (addr <= 0x7fff) {
@@ -140,4 +140,4 @@ void BusImpl::transfer() {
   dma_source_address++;
 }
 
-}  // namespace gbemu
+}  // namespace gbeml
