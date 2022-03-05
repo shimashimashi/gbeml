@@ -329,7 +329,7 @@ TEST(CpuTest, jr_n_pos) {
   cpu->set_pc(1);
   cpu->tick();
   EXPECT_EQ(7, cpu->get_pc());
-  expectCycles(8, cpu);
+  expectCycles(12, cpu);
 }
 
 TEST(CpuTest, jr_n_neg) {
@@ -342,7 +342,7 @@ TEST(CpuTest, jr_n_neg) {
   cpu->set_pc(1);
   cpu->tick();
   EXPECT_EQ(1, cpu->get_pc());
-  expectCycles(8, cpu);
+  expectCycles(12, cpu);
 }
 
 TEST(CpuTest, rra) {
@@ -358,7 +358,7 @@ TEST(CpuTest, rra) {
   expectCycles(4, cpu);
 }
 
-TEST(CpuTest, jr_cc_n) {
+TEST(CpuTest, jr_cc_n_true) {
   MockBus bus;
   InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x20));
@@ -366,8 +366,23 @@ TEST(CpuTest, jr_cc_n) {
 
   Cpu* cpu = new Cpu(&bus, &ic);
   cpu->set_pc(1);
+  cpu->set_z(false);
   cpu->tick();
   EXPECT_EQ(1, cpu->get_pc());
+  expectCycles(12, cpu);
+}
+
+TEST(CpuTest, jr_cc_n_false) {
+  MockBus bus;
+  InterruptControllerImpl ic;
+  EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x20));
+  EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0xfe));
+
+  Cpu* cpu = new Cpu(&bus, &ic);
+  cpu->set_pc(1);
+  cpu->set_z(true);
+  cpu->tick();
+  EXPECT_EQ(3, cpu->get_pc());
   expectCycles(8, cpu);
 }
 
@@ -540,6 +555,19 @@ TEST(CpuTest, cp_a_r) {
   expectCycles(4, cpu);
 }
 
+TEST(CpuTest, cp_a_n) {
+  MockBus bus;
+  InterruptControllerImpl ic;
+  EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11111110));
+  EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(1));
+
+  Cpu* cpu = new Cpu(&bus, &ic);
+  cpu->set_a(1);
+  cpu->tick();
+  EXPECT_EQ(1, cpu->get_a());
+  expectCycles(8, cpu);
+}
+
 TEST(CpuTest, ret_cc) {
   MockBus bus;
   InterruptControllerImpl ic;
@@ -552,7 +580,7 @@ TEST(CpuTest, ret_cc) {
   cpu->set_carry(true);
   cpu->tick();
   EXPECT_EQ(0x1234, cpu->get_pc());
-  expectCycles(8, cpu);
+  expectCycles(20, cpu);
 }
 
 TEST(CpuTest, pop) {
@@ -583,7 +611,7 @@ TEST(CpuTest, pop_af) {
   expectCycles(12, cpu);
 }
 
-TEST(CpuTest, jp_cc_n16) {
+TEST(CpuTest, jp_cc_n16_true) {
   MockBus bus;
   InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11010010));
@@ -591,9 +619,23 @@ TEST(CpuTest, jp_cc_n16) {
   EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x12));
 
   Cpu* cpu = new Cpu(&bus, &ic);
-  cpu->set_z(true);
+  cpu->set_carry(false);
   cpu->tick();
   EXPECT_EQ(0x1234, cpu->get_pc());
+  expectCycles(16, cpu);
+}
+
+TEST(CpuTest, jp_cc_n16_false) {
+  MockBus bus;
+  InterruptControllerImpl ic;
+  EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11010010));
+  EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x34));
+  EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x12));
+
+  Cpu* cpu = new Cpu(&bus, &ic);
+  cpu->set_carry(true);
+  cpu->tick();
+  EXPECT_EQ(3, cpu->get_pc());
   expectCycles(12, cpu);
 }
 
@@ -610,7 +652,7 @@ TEST(CpuTest, jp_n16) {
   expectCycles(12, cpu);
 }
 
-TEST(CpuTest, call_cc_n16) {
+TEST(CpuTest, call_cc_n16_true) {
   MockBus bus;
   InterruptControllerImpl ic;
   EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11001100));
@@ -624,6 +666,21 @@ TEST(CpuTest, call_cc_n16) {
   cpu->set_z(true);
   cpu->tick();
   EXPECT_EQ(0x1234, cpu->get_pc());
+  expectCycles(24, cpu);
+}
+
+TEST(CpuTest, call_cc_n16_false) {
+  MockBus bus;
+  InterruptControllerImpl ic;
+  EXPECT_CALL(bus, read(0)).WillOnce(testing::Return(0b11001100));
+  EXPECT_CALL(bus, read(1)).WillOnce(testing::Return(0x34));
+  EXPECT_CALL(bus, read(2)).WillOnce(testing::Return(0x12));
+
+  Cpu* cpu = new Cpu(&bus, &ic);
+  cpu->set_sp(0xfffe);
+  cpu->set_z(false);
+  cpu->tick();
+  EXPECT_EQ(3, cpu->get_pc());
   expectCycles(12, cpu);
 }
 
@@ -679,7 +736,7 @@ TEST(CpuTest, rst_n) {
   cpu->set_sp(0xfffe);
   cpu->tick();
   EXPECT_EQ(0x08, cpu->get_pc());
-  expectCycles(32, cpu);
+  expectCycles(16, cpu);
 }
 
 TEST(CpuTest, ret) {
@@ -693,7 +750,7 @@ TEST(CpuTest, ret) {
   cpu->set_sp(0xfffe);
   cpu->tick();
   EXPECT_EQ(0x1234, cpu->get_pc());
-  expectCycles(8, cpu);
+  expectCycles(16, cpu);
 }
 
 TEST(CpuTest, call_n16) {
@@ -709,7 +766,7 @@ TEST(CpuTest, call_n16) {
   cpu->set_sp(0xfffe);
   cpu->tick();
   EXPECT_EQ(0x1234, cpu->get_pc());
-  expectCycles(12, cpu);
+  expectCycles(24, cpu);
 }
 
 TEST(CpuTest, addc_a_n) {
@@ -750,7 +807,7 @@ TEST(CpuTest, reti) {
   cpu->tick();
   EXPECT_EQ(0x1234, cpu->get_pc());
   EXPECT_TRUE(cpu->interruptEnabled());
-  expectCycles(8, cpu);
+  expectCycles(16, cpu);
 }
 
 TEST(CpuTest, subc_a_n) {

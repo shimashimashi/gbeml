@@ -657,6 +657,7 @@ void Cpu::jp_cc_n16(const Opcode& opcode) {
   u8 n = opcode.slice(3, 4);
   if (checkFlags(n)) {
     set_pc(addr);
+    stalls += 4;
   }
 }
 
@@ -667,6 +668,7 @@ void Cpu::jp_hl() { set_pc(get_hl()); }
 void Cpu::jr_n() {
   u8 offset = fetch();
   jumpRelative(offset);
+  stalls += 4;
 }
 
 // 001xx000
@@ -675,15 +677,16 @@ void Cpu::jr_cc_n(const Opcode& opcode) {
   u8 n = opcode.slice(3, 4);
   if (checkFlags(n)) {
     jumpRelative(offset);
+    stalls += 4;
   }
 }
 
 // 11001101
-// cycles = 12
+// cycles = 24
 void Cpu::call_n16() {
   u16 addr = fetchWord();
   call(addr);
-  stalls -= 8;
+  stalls += 4;
 }
 
 // 110xx100
@@ -693,9 +696,8 @@ void Cpu::call_cc_n16(const Opcode& opcode) {
   u8 n = opcode.slice(3, 4);
   if (checkFlags(n)) {
     call(addr);
+    stalls += 4;
   }
-  // not sure
-  stalls -= 8;
 }
 
 // 11xxx111
@@ -735,23 +737,25 @@ void Cpu::rst_n(const Opcode& opcode) {
       break;
   }
   set_pc(addr);
-  stalls += 20;
+  stalls += 4;
 }
 
 // 11001001
-// cycles = 8
+// cycles = 16
 void Cpu::ret() {
   u16 addr = popStack();
   set_pc(addr);
-  stalls -= 4;
+  stalls += 4;
 }
 
 // 110xx000
+// cycles = 20 if true else 8
 void Cpu::ret_cc(const Opcode& opcode) {
   u8 n = opcode.slice(3, 4);
   if (checkFlags(n)) {
     ret();
   }
+  stalls += 4;
 }
 
 // 11011001
