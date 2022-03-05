@@ -1,6 +1,6 @@
 #include "core/cpu/alu.h"
 
-namespace gbemu {
+namespace gbeml {
 
 u8 Alu::get_a() { return af->getHigh()->get(); }
 bool Alu::get_z() { return af->getLow()->getAt(7); }
@@ -282,4 +282,4 @@ u8 Alu::resetBit(u8 i, u8 n) {
   return n & ~b;
 }
 
-}  // namespace gbemu
+}  // namespace gbeml

@@ -2,7 +2,7 @@
 
 #include "cassert"
 
-namespace gbemu {
+namespace gbeml {
 
 u8 RamImpl::read(u16 addr) const {
   assert(addr < size);
@@ -14,4 +14,4 @@ void RamImpl::write(u16 addr, u8 value) {
   data[addr] = value;
 }
 
-}  // namespace gbemu
+}  // namespace gbeml

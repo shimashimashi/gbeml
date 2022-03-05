@@ -1,7 +1,7 @@
 #include "core/interrupt/interrupt_controller.h"
 
-namespace gbemu {
+namespace gbeml {
 
 InterruptController::~InterruptController() {}
 
-}  // namespace gbemu
+}  // namespace gbeml

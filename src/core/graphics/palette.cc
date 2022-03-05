@@ -1,7 +1,8 @@
 #include "core/graphics/palette.h"
+
 #include "glog/logging.h"
 
-namespace gbemu {
+namespace gbeml {
 
 u8 Palette::read() const { return data.get(); }
 
@@ -41,4 +42,4 @@ Color Palette::getColor(u8 color_id) {
       return Color::White;
   }
 }
-}  // namespace gbemu
+}  // namespace gbeml

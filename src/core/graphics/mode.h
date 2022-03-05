@@ -1,10 +1,10 @@
-#ifndef GBEMU_PPU_MODE_H_
-#define GBEMU_PPU_MODE_H_
+#ifndef GBEML_PPU_MODE_H_
+#define GBEML_PPU_MODE_H_
 
-namespace gbemu {
+namespace gbeml {
 
 enum class PpuMode { HBlank, VBlank, OamScan, Drawing };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_PPU_MODE_H_
+#endif  // GBEML_PPU_MODE_H_

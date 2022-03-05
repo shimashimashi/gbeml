@@ -1,7 +1,7 @@
 #include "core/display/display.h"
 
-namespace gbemu {
+namespace gbeml {
 
 Display::~Display() {}
 
-}  // namespace gbemu
+}  // namespace gbeml

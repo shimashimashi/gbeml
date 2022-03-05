@@ -1,11 +1,11 @@
-#ifndef GBEMU_INTERRUPT_CONTROLLER_IMPL_H_
-#define GBEMU_INTERRUPT_CONTROLLER_IMPL_H_
+#ifndef GBEML_INTERRUPT_CONTROLLER_IMPL_H_
+#define GBEML_INTERRUPT_CONTROLLER_IMPL_H_
 
 #include "core/interrupt/interrupt_controller.h"
 #include "core/register/register.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class InterruptControllerImpl : public InterruptController {
  public:
@@ -36,6 +36,6 @@ class InterruptControllerImpl : public InterruptController {
   Register interrupt_enable;
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_INTERRUPT_CONTROLLER_IMPL_H_
+#endif  // GBEML_INTERRUPT_CONTROLLER_IMPL_H_

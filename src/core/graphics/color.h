@@ -1,10 +1,10 @@
-#ifndef GBEMU_COLOR_H_
-#define GBEMU_COLOR_H_
+#ifndef GBEML_COLOR_H_
+#define GBEML_COLOR_H_
 
-namespace gbemu {
+namespace gbeml {
 
 enum class Color { White, LightGray, DarkGray, Black };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_COLOR_H_
+#endif  // GBEML_COLOR_H_

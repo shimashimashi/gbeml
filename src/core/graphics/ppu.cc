@@ -6,7 +6,7 @@
 
 #include "glog/logging.h"
 
-namespace gbemu {
+namespace gbeml {
 
 u8 Lcdc::read() const { return flags.get(); }
 
@@ -346,4 +346,4 @@ void Ppu::writeObp1(u8 value) { obp1.write(value); }
 
 PpuMode Ppu::getMode() { return mode; }
 
-}  // namespace gbemu
+}  // namespace gbeml

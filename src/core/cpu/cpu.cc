@@ -2,7 +2,7 @@
 
 #include <glog/logging.h>
 
-namespace gbemu {
+namespace gbeml {
 
 u16 Cpu::get_af() { return af.get(); }
 u16 Cpu::get_bc() { return bc.get(); }
@@ -923,4 +923,4 @@ void Cpu::handleInterrupt() {
   }
 }
 
-}  // namespace gbemu
+}  // namespace gbeml

@@ -1,9 +1,9 @@
-#ifndef GBEMU_RAM_H_
-#define GBEMU_RAM_H_
+#ifndef GBEML_RAM_H_
+#define GBEML_RAM_H_
 
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class Ram {
  public:
@@ -12,6 +12,6 @@ class Ram {
   virtual void write(u16 addr, u8 value) = 0;
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_RAM_H_
+#endif  // GBEML_RAM_H_

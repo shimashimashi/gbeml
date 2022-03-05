@@ -1,9 +1,9 @@
-#ifndef GBEMU_BUS_H_
-#define GBEMU_BUS_H_
+#ifndef GBEML_BUS_H_
+#define GBEML_BUS_H_
 
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class Bus {
  public:
@@ -13,6 +13,6 @@ class Bus {
   virtual void tick() = 0;
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_BUS_H_
+#endif  // GBEML_BUS_H_

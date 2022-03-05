@@ -1,9 +1,9 @@
-#ifndef GBEMU_REGISTER_H_
-#define GBEMU_REGISTER_H_
+#ifndef GBEML_REGISTER_H_
+#define GBEML_REGISTER_H_
 
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class Register {
  public:
@@ -41,6 +41,6 @@ class RegisterPair {
   Register low;
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_REGISTER_H_
+#endif  // GBEML_REGISTER_H_

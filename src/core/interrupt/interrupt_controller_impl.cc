@@ -1,6 +1,6 @@
 #include "core/interrupt/interrupt_controller_impl.h"
 
-namespace gbemu {
+namespace gbeml {
 
 u8 InterruptControllerImpl::readInterruptFlag() const {
   return interrupt_flag.get();
@@ -42,4 +42,4 @@ bool InterruptControllerImpl::isLcdStatRequested() {
   return interrupt_flag.getAt(1);
 }
 
-}  // namespace gbemu
+}  // namespace gbeml

@@ -1,5 +1,5 @@
-#ifndef GBEMU_PIXEL_FIFO_H_
-#define GBEMU_PIXEL_FIFO_H_
+#ifndef GBEML_PIXEL_FIFO_H_
+#define GBEML_PIXEL_FIFO_H_
 
 #include <array>
 #include <queue>
@@ -10,7 +10,7 @@
 #include "core/register/register.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 class PixelFifo {
  public:
@@ -27,6 +27,6 @@ class PixelFifo {
   std::queue<Color> pixels;
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_PIXEL_FIFO_H_
+#endif  // GBEML_PIXEL_FIFO_H_

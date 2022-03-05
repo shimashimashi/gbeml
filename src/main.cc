@@ -18,15 +18,15 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  gbemu::MiniFbDisplay display;
-  gbemu::GameBoy gb(&display);
+  gbeml::MiniFbDisplay display;
+  gbeml::GameBoy gb(&display);
   if (!gb.init(FLAGS_filename)) {
     std::cout << "Failed to initialize gb." << std::endl;
     return 1;
   }
   std::cout << "GB init OK" << std::endl;
 
-  gbemu::MiniFbWindow window;
+  gbeml::MiniFbWindow window;
   if (!window.init()) {
     std::cout << "Failed to initialize window." << std::endl;
     return 1;
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
       gb.tick();
     }
 
-    gbemu::u32 *buffer = display.getBuffer();
+    gbeml::u32 *buffer = display.getBuffer();
     if (!window.update(buffer)) {
       break;
     }

@@ -1,12 +1,12 @@
-#ifndef GBEMU_MBC_H_
-#define GBEMU_MBC_H_
+#ifndef GBEML_MBC_H_
+#define GBEML_MBC_H_
 
 #include <array>
 
 #include "core/memory/rom.h"
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 enum class BankingMode { SimpleRomBankingMode, RamBankingMode };
 
@@ -54,6 +54,6 @@ class Mbc1 : public Mbc {
   bool is_large_rom = false;
 };
 
-}  // namespace gbemu
+}  // namespace gbeml
 
-#endif  // GBEMU_MBC_H_
+#endif  // GBEML_MBC_H_

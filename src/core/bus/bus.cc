@@ -1,7 +1,7 @@
 #include "core/bus/bus.h"
 
-namespace gbemu {
+namespace gbeml {
 
 Bus::~Bus() {}
 
-}  // namespace gbemu
+}  // namespace gbeml

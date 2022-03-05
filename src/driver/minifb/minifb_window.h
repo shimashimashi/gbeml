@@ -2,7 +2,7 @@
 
 #include "core/types/types.h"
 
-namespace gbemu {
+namespace gbeml {
 
 #define kUnused(var) (void)var;
 #define WIDTH 160
@@ -42,4 +42,4 @@ class MiniFbWindow {
   struct mfb_window *window;
 };
 
-}  // namespace gbemu
+}  // namespace gbeml

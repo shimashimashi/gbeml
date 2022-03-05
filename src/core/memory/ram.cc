@@ -1,7 +1,7 @@
 #include "core/memory/ram.h"
 
-namespace gbemu {
+namespace gbeml {
 
 Ram::~Ram() {}
 
-}  // namespace gbemu
+}  // namespace gbeml
