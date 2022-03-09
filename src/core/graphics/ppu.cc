@@ -152,7 +152,6 @@ u8 Ppu::getBackgroundHighTileData(u8 tile_number) {
 
 void Ppu::fetchPixels() {
   u8 tile_number = getBackgroundTileNumber();
-  VLOG(1) << "tile_number: " << (int)tile_number << std::endl;
 
   u8 low = getBackgroundLowTileData(tile_number);
   u8 high = getBackgroundHighTileData(tile_number);

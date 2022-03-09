@@ -1,6 +1,9 @@
 #include "core/bus/bus_impl.h"
 
+#include <glog/logging.h>
+
 #include <cstdio>
+#include <iostream>
 
 namespace gbeml {
 
@@ -14,12 +17,20 @@ u8 BusImpl::read(u16 addr) const {
   } else if (addr <= 0xdfff) {
     return wram->read(addr - 0xc000);
   } else if (addr <= 0xfdff) {
-    return wram->read(addr - 0xf000);
+    return wram->read(addr - 0xe000);
   } else if (addr <= 0xfe9f) {
     return ppu->readOam(addr - 0xfe00);
   } else if (addr <= 0xfeff) {
     fprintf(stderr, "Address %x is not usable\n", addr);
     return 0x00;
+  } else if (addr == 0xff04) {
+    return timer->readDivider();
+  } else if (addr == 0xff05) {
+    return timer->readCounter();
+  } else if (addr == 0xff06) {
+    return timer->readModulo();
+  } else if (addr == 0xff07) {
+    return timer->readControl();
   } else if (addr == 0xff0f) {
     return ic->readInterruptFlag();
   } else if (addr == 0xff40) {
@@ -69,11 +80,23 @@ void BusImpl::write(u16 addr, u8 value) {
   } else if (addr <= 0xdfff) {
     wram->write(addr - 0xc000, value);
   } else if (addr <= 0xfdff) {
-    wram->write(addr - 0xf000, value);
+    wram->write(addr - 0xe000, value);
   } else if (addr <= 0xfe9f) {
     ppu->writeOam(addr - 0xfe00, value);
   } else if (addr <= 0xfeff) {
     fprintf(stderr, "Address %x is not usable\n", addr);
+  } else if (addr == 0xff01) {
+    DLOG(INFO) << "0xff01: " << value << std::endl;
+  } else if (addr == 0xff02) {
+    DLOG(INFO) << "0xff02: " << (int)value << std::endl;
+  } else if (addr == 0xff04) {
+    timer->resetDivider();
+  } else if (addr == 0xff05) {
+    timer->writeCounter(value);
+  } else if (addr == 0xff06) {
+    timer->writeModulo(value);
+  } else if (addr == 0xff07) {
+    timer->writeControl(value);
   } else if (addr == 0xff0f) {
     ic->writeInterruptFlag(value);
   } else if (addr == 0xff40) {

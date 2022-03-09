@@ -56,9 +56,13 @@ class Cpu {
   void set_z(bool flag);
 
   void tick();
+  void advance(u64 n);
 
-  bool stalled();
+  bool isStalled();
+  bool isHalted();
   bool interruptEnabled();
+
+  void setBreakpoint(i32 breakpoint);
 
  private:
   Bus* bus;
@@ -67,6 +71,7 @@ class Cpu {
   bool ime;
   u64 stalls = 0;
   bool halted = false;
+  i64 breakpoint = -1;
 
   RegisterPair af;
   RegisterPair bc;
@@ -236,8 +241,7 @@ class Cpu {
   void writeRegister(u8 r, u8 n);
 
   Register* selectRegister(u8 r);
-  RegisterPair* selectBcDeHlSp(u8 r);
-  RegisterPair* selectBcDeHlAf(u8 r);
+  RegisterPair* selectRegisterPair(u8 r);
 
   u8 readMemory(u16 addr);
   void writeMemory(u16 addr, u8 value);

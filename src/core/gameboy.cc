@@ -1,12 +1,16 @@
 #include "gameboy.h"
 
+#include <debugbreak.h>
+
 #include "core/bus/bus_impl.h"
 #include "core/interrupt/interrupt_controller_impl.h"
 #include "core/memory/ram_impl.h"
+#include "core/timer/timer_impl.h"
 
 namespace gbeml {
 
 void GameBoy::tick() {
+  timer->tick();
   cpu->tick();
   ppu->tick();
   bus->tick();
@@ -14,6 +18,7 @@ void GameBoy::tick() {
 
 bool GameBoy::init(const std::string& filename) {
   ic = new InterruptControllerImpl(0xe1, 0x00);
+  timer = new TimerImpl(ic, 0xab, 0x00, 0x00, 0xf8);
 
   rom = new Rom();
   rom->load(filename);
@@ -36,7 +41,7 @@ bool GameBoy::init(const std::string& filename) {
   oam = new RamImpl(160);
 
   ppu = new Ppu(display, vram, oam, ic);
-  bus = new BusImpl(mbc, wram, hram, ppu, ic);
+  bus = new BusImpl(mbc, wram, hram, ppu, timer, ic);
   cpu = new Cpu(bus, ic);
 
   cpu->set_a(0x01);
@@ -49,6 +54,7 @@ bool GameBoy::init(const std::string& filename) {
   cpu->set_l(0x4d);
   cpu->set_pc(0x0100);
   cpu->set_sp(0xfffe);
+  cpu->setBreakpoint(breakpoint);
 
   ppu->writeLcdc(0x91);
   ppu->writeLcdStat(0x81);

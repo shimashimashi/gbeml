@@ -11,12 +11,14 @@
 #include "core/memory/mbc.h"
 #include "core/memory/ram.h"
 #include "core/memory/rom.h"
+#include "core/timer/timer.h"
 
 namespace gbeml {
 
 class GameBoy {
  public:
-  GameBoy(Display* display_) : display(display_) {}
+  GameBoy(Display* display_, i32 breakpoint_)
+      : display(display_), breakpoint(breakpoint_) {}
   void tick();
   bool init(const std::string& filename);
 
@@ -32,6 +34,9 @@ class GameBoy {
   Ram* vram;
   Ram* oam;
   InterruptController* ic;
+  Timer* timer;
+
+  i32 breakpoint;
 };
 
 }  // namespace gbeml

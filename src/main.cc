@@ -8,6 +8,7 @@
 #include "driver/minifb/minifb_window.h"
 
 DEFINE_string(filename, "", "Rom filename");
+DEFINE_int32(breakpoint, -1, "PC at breakpoint");
 
 int main(int argc, char *argv[]) {
   google::InitGoogleLogging(argv[0]);
@@ -18,8 +19,13 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  int breakpoint;
+  std::stringstream ss;
+  ss << std::hex << FLAGS_breakpoint;
+  ss >> breakpoint;
+
   gbeml::MiniFbDisplay display;
-  gbeml::GameBoy gb(&display);
+  gbeml::GameBoy gb(&display, breakpoint);
   if (!gb.init(FLAGS_filename)) {
     std::cout << "Failed to initialize gb." << std::endl;
     return 1;
