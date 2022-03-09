@@ -53,6 +53,31 @@ TEST(AluTest, addc_n_addsNPlusC) {
   alu.set_c(true);
   alu.addc_n(0xfe);
   EXPECT_EQ(0xff, alu.get_a());
+
+  alu.set_a(0);
+  alu.set_c(false);
+  alu.addc_n(0xfe);
+  EXPECT_EQ(0xfe, alu.get_a());
+}
+
+TEST(AluTest, addc_n_setsCarry) {
+  RegisterPair af(0xff, 0);
+  Alu alu(&af);
+
+  alu.set_c(true);
+  alu.addc_n(0);
+  EXPECT_EQ(0, alu.get_a());
+  EXPECT_EQ(true, alu.get_c());
+}
+
+TEST(AluTest, addc_n_setsHalfCarry) {
+  RegisterPair af(0xf, 0);
+  Alu alu(&af);
+
+  alu.set_c(true);
+  alu.addc_n(0);
+  EXPECT_EQ(0x10, alu.get_a());
+  EXPECT_EQ(true, alu.get_h());
 }
 
 TEST(AluTest, sub_n_setsZFlagIfResultIsZero) {
@@ -102,10 +127,34 @@ TEST(AluTest, subc_n_subtractsNPlusC) {
   RegisterPair af;
   Alu alu(&af);
   alu.set_a(0xff);
-
   alu.set_c(true);
   alu.subc_n(0xfe);
   EXPECT_EQ(0, alu.get_a());
+
+  alu.set_a(0xff);
+  alu.set_c(false);
+  alu.subc_n(0xfe);
+  EXPECT_EQ(1, alu.get_a());
+}
+
+TEST(AluTest, subc_n_setsCarry) {
+  RegisterPair af;
+  Alu alu(&af);
+  alu.set_a(0x0);
+
+  alu.set_c(true);
+  alu.subc_n(0);
+  EXPECT_EQ(true, alu.get_c());
+}
+
+TEST(AluTest, subc_n_setsHalfCarry) {
+  RegisterPair af;
+  Alu alu(&af);
+  alu.set_a(0xf0);
+
+  alu.set_c(true);
+  alu.subc_n(0);
+  EXPECT_EQ(true, alu.get_h());
 }
 
 TEST(AluTest, and_n_setsZIfResultIsZero) {
@@ -290,8 +339,19 @@ TEST(AluTest, add_sp_n8_setsCIfCarryFromBit7) {
   RegisterPair hl(0, 0xff);
 
   EXPECT_EQ(false, alu.get_c());
-  alu.add_sp_n8(&hl, 0xff);
+  alu.add_sp_n8(&hl, 0x01);
   EXPECT_EQ(true, alu.get_c());
+}
+
+TEST(AluTest, add_sp_n8_subtract) {
+  RegisterPair af;
+  Alu alu(&af);
+  RegisterPair hl(0xff, 0x01);
+
+  u16 n = alu.add_sp_n8(&hl, 0xff);
+  EXPECT_EQ(0xff00, n);
+  EXPECT_EQ(true, alu.get_c());
+  EXPECT_EQ(true, alu.get_h());
 }
 
 TEST(AluTest, daa_decimalAdjustAfterAddition) {
@@ -341,16 +401,38 @@ TEST(AluTest, daa_decimalAdjustAfterAddition) {
   EXPECT_EQ(true, alu.get_c());
   EXPECT_EQ(false, alu.get_h());
   EXPECT_EQ(false, alu.get_z());
+
+  // 100
+  alu.set_a(0x9a);
+  alu.set_c(false);
+  alu.set_h(false);
+  alu.set_n(false);
+  alu.daa();
+  EXPECT_EQ(0x00, alu.get_a());
+  EXPECT_EQ(true, alu.get_c());
+  EXPECT_EQ(false, alu.get_h());
+  EXPECT_EQ(true, alu.get_z());
 }
 
 TEST(AluTest, daa_decimalAdjustAfterSubtraction) {
   RegisterPair af;
   Alu alu(&af);
 
-  // 9
+  // f
   alu.set_a(0x0f);
   alu.set_c(false);
   alu.set_h(false);
+  alu.set_n(true);
+  alu.daa();
+  EXPECT_EQ(0x0f, alu.get_a());
+  EXPECT_EQ(false, alu.get_c());
+  EXPECT_EQ(false, alu.get_h());
+  EXPECT_EQ(false, alu.get_z());
+
+  // 9
+  alu.set_a(0x0f);
+  alu.set_c(false);
+  alu.set_h(true);
   alu.set_n(true);
   alu.daa();
   EXPECT_EQ(0x09, alu.get_a());
@@ -369,14 +451,25 @@ TEST(AluTest, daa_decimalAdjustAfterSubtraction) {
   EXPECT_EQ(false, alu.get_h());
   EXPECT_EQ(false, alu.get_z());
 
-  // 90
+  // f0
   alu.set_a(0xf0);
   alu.set_c(false);
   alu.set_h(false);
   alu.set_n(true);
   alu.daa();
-  EXPECT_EQ(0x90, alu.get_a());
+  EXPECT_EQ(0xf0, alu.get_a());
   EXPECT_EQ(false, alu.get_c());
+  EXPECT_EQ(false, alu.get_h());
+  EXPECT_EQ(false, alu.get_z());
+
+  // 90
+  alu.set_a(0xf0);
+  alu.set_c(true);
+  alu.set_h(false);
+  alu.set_n(true);
+  alu.daa();
+  EXPECT_EQ(0x90, alu.get_a());
+  EXPECT_EQ(true, alu.get_c());
   EXPECT_EQ(false, alu.get_h());
   EXPECT_EQ(false, alu.get_z());
 
@@ -387,7 +480,7 @@ TEST(AluTest, daa_decimalAdjustAfterSubtraction) {
   alu.set_n(true);
   alu.daa();
   EXPECT_EQ(0x10, alu.get_a());
-  EXPECT_EQ(false, alu.get_c());
+  EXPECT_EQ(true, alu.get_c());
   EXPECT_EQ(false, alu.get_h());
   EXPECT_EQ(false, alu.get_z());
 }

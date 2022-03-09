@@ -32,6 +32,8 @@ add_library(
     core/graphics/pixel_fifo.cc
     core/graphics/ppu.cc
     core/display/display.cc
+    core/timer/timer.cc
+    core/timer/timer_impl.cc
 )
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     target_compile_options(
@@ -52,7 +54,7 @@ target_link_libraries(
     glog
 )
 target_link_options(gbeml_core PRIVATE --coverage)
-target_include_directories(gbeml_core PUBLIC .)
+target_include_directories(gbeml_core PUBLIC . ${CMAKE_SOURCE_DIR}/third_party/debugbreak)
 
 add_executable(
     gbeml

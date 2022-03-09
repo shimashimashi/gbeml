@@ -20,7 +20,7 @@ class Alu {
   void xor_n(u8 n);
   void cp_n(u8 n);
   void add_hl_n16(RegisterPair* r, u16 n);
-  void add_sp_n8(RegisterPair* r, u8 n);
+  u16 add_sp_n8(RegisterPair* r, i8 n);
 
   u8 inc(u8 n);
   u8 dec(u8 n);
@@ -74,10 +74,6 @@ class Alu {
   u8 shiftLeft(u8 n);
   u8 shiftRightArithmetic(u8 n);
   u8 shiftRightLogical(u8 n);
-
-  void testBit(u8 n, u8 i);
-  u8 setBit(u8 n, u8 i);
-  u8 resetBit(u8 n, u8 i);
 };
 
 }  // namespace gbeml

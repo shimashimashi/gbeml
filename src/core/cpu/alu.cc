@@ -24,7 +24,20 @@ void Alu::add_n(u8 n) {
   set_a(a + n);
 }
 
-void Alu::addc_n(u8 n) { return add_n(n + get_c()); }
+void Alu::addc_n(u8 n) {
+  u8 a = get_a();
+  bool c = get_c();
+  set_a(a + c);
+  add_n(n);
+  if (c) {
+    if (a == 0xff) {
+      set_c(true);
+    }
+    if ((a & 0xf) == 0xf) {
+      set_h(true);
+    }
+  }
+}
 
 void Alu::sub_n(u8 n) {
   u8 a = get_a();
@@ -32,7 +45,20 @@ void Alu::sub_n(u8 n) {
   set_a(a - n);
 }
 
-void Alu::subc_n(u8 n) { sub_n(n + get_c()); }
+void Alu::subc_n(u8 n) {
+  u8 a = get_a();
+  bool c = get_c();
+  set_a(a - c);
+  sub_n(n);
+  if (c) {
+    if (a == 0) {
+      set_c(true);
+    }
+    if ((a & 0xf) == 0x0) {
+      set_h(true);
+    }
+  }
+}
 
 void Alu::and_n(u8 n) {
   u8 a = get_a();
@@ -71,19 +97,19 @@ void Alu::cp_n(u8 n) {
 
 void Alu::add_hl_n16(RegisterPair* r, u16 n) {
   u16 hl = r->get();
-  set_c(static_cast<u32>(hl) + n > 0xffff);
+  set_c(hl + n > 0xffff);
   set_h((hl & 0xfff) + (n & 0xfff) > 0xfff);
   set_n(false);
   r->set(hl + n);
 }
 
-void Alu::add_sp_n8(RegisterPair* r, u8 n) {
+u16 Alu::add_sp_n8(RegisterPair* r, i8 n) {
   u16 sp = r->get();
-  set_c((sp & 0xff) + n > 0xff);
-  set_h((sp & 0xf) + (n & 0xf) > 0xf);
+  set_c((sp & 0xff) + static_cast<u8>(n) > 0xff);
+  set_h((sp & 0xf) + (static_cast<u8>(n) & 0xf) > 0xf);
   set_z(false);
   set_n(false);
-  r->set(sp + n);
+  return sp + n;
 }
 
 u8 Alu::inc(u8 n) {
@@ -96,7 +122,7 @@ u8 Alu::inc(u8 n) {
 u8 Alu::dec(u8 n) {
   set_h((n & 0xf) < 1);
   set_z(static_cast<u8>(n - 1) == 0);
-  set_n(false);
+  set_n(true);
   return n - 1;
 }
 
@@ -114,27 +140,21 @@ u8 Alu::swap(u8 n) {
 
 void Alu::daa() {
   u8 a = get_a();
-  u8 h = a >> 4;
-  u8 l = a & 0xf;
 
   if (get_n()) {
-    if (get_c() || h > 9) {
+    if (get_c()) {
       a -= 0x60;
     }
-    if (get_h() || l > 9) {
+    if (get_h()) {
       a -= 6;
     }
-
-    set_c(false);
   } else {
-    if (get_c() || h > 9) {
+    if (get_c() || a > 0x99) {
       a += 0x60;
       set_c(true);
-    } else {
-      set_c(false);
     }
 
-    if (get_h() || l > 9) {
+    if (get_h() || (a & 0xf) > 9) {
       a += 6;
     }
   }
@@ -166,21 +186,25 @@ void Alu::scf() {
 void Alu::rlca() {
   u8 n = rotateLeft(get_a());
   set_a(n);
+  set_z(false);
 }
 
 void Alu::rla() {
   u8 n = rotateLeftThroughCarry(get_a());
   set_a(n);
+  set_z(false);
 }
 
 void Alu::rrca() {
   u8 n = rotateRight(get_a());
   set_a(n);
+  set_z(false);
 }
 
 void Alu::rra() {
   u8 n = rotateRightThroughCarry(get_a());
   set_a(n);
+  set_z(false);
 }
 
 u8 Alu::rlc(u8 n) { return rotateLeft(n); }
@@ -203,9 +227,17 @@ void Alu::bit_b(u8 i, u8 n) {
   set_h(true);
 }
 
-u8 Alu::set_b(u8 i, u8 n) { return setBit(i, n); }
+u8 Alu::set_b(u8 i, u8 n) {
+  u8 b = 1;
+  b <<= i;
+  return n | b;
+}
 
-u8 Alu::res_b(u8 i, u8 n) { return resetBit(i, n); }
+u8 Alu::res_b(u8 i, u8 n) {
+  u8 b = 1;
+  b <<= i;
+  return n & ~b;
+}
 
 u8 Alu::rotateLeft(u8 n) {
   u8 res = static_cast<u8>(n << 1) | (n >> 7);
@@ -268,18 +300,6 @@ u8 Alu::shiftRightLogical(u8 n) {
   set_h(false);
   set_c(n & 1);
   return res;
-}
-
-u8 Alu::setBit(u8 i, u8 n) {
-  u8 b = 1;
-  b <<= i;
-  return n | b;
-}
-
-u8 Alu::resetBit(u8 i, u8 n) {
-  u8 b = 1;
-  b <<= i;
-  return n & ~b;
 }
 
 }  // namespace gbeml

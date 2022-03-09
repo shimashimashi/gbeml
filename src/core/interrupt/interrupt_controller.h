@@ -18,15 +18,23 @@ class InterruptController {
 
   virtual void signalVBlank() = 0;
   virtual void signalLcdStat() = 0;
+  virtual void signalTimer() = 0;
+  virtual void signalSerial() = 0;
+  virtual void signalJoypad() = 0;
 
   virtual void clearVBlank() = 0;
   virtual void clearLcdStat() = 0;
-
-  virtual bool isVBlankEnabled() = 0;
-  virtual bool isLcdStatEnabled() = 0;
+  virtual void clearTimer() = 0;
+  virtual void clearSerial() = 0;
+  virtual void clearJoypad() = 0;
 
   virtual bool isVBlankRequested() = 0;
   virtual bool isLcdStatRequested() = 0;
+  virtual bool isTimerRequested() = 0;
+  virtual bool isSerialRequested() = 0;
+  virtual bool isJoypadRequested() = 0;
+
+  virtual bool isInterruptRequested() = 0;
 };
 
 }  // namespace gbeml

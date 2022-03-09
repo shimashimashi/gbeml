@@ -21,15 +21,23 @@ class InterruptControllerImpl : public InterruptController {
 
   virtual void signalVBlank() override;
   virtual void signalLcdStat() override;
+  virtual void signalTimer() override;
+  virtual void signalSerial() override;
+  virtual void signalJoypad() override;
 
   virtual void clearVBlank() override;
   virtual void clearLcdStat() override;
-
-  virtual bool isVBlankEnabled() override;
-  virtual bool isLcdStatEnabled() override;
+  virtual void clearTimer() override;
+  virtual void clearSerial() override;
+  virtual void clearJoypad() override;
 
   virtual bool isVBlankRequested() override;
   virtual bool isLcdStatRequested() override;
+  virtual bool isTimerRequested() override;
+  virtual bool isSerialRequested() override;
+  virtual bool isJoypadRequested() override;
+
+  virtual bool isInterruptRequested() override;
 
  private:
   Register interrupt_flag;
