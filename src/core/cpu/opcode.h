@@ -13,7 +13,6 @@ class Opcode {
   Opcode(u8 code) : value(code) {}
 
   u8 get() const;
-  bool match(const std::string& pattern) const;
   u8 slice(u8 from, u8 to) const;
 
  private:

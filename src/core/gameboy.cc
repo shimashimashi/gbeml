@@ -70,4 +70,6 @@ bool GameBoy::init(const std::string& filename) {
   return true;
 }
 
+Display* GameBoy::getDisplay() const { return display; }
+
 }  // namespace gbeml

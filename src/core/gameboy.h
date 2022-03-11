@@ -21,6 +21,7 @@ class GameBoy {
       : display(display_), breakpoint(breakpoint_) {}
   void tick();
   bool init(const std::string& filename);
+  Display* getDisplay() const;
 
  private:
   Display* display;

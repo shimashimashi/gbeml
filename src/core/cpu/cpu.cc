@@ -88,132 +88,134 @@ u8 Cpu::fetch() {
 }
 
 void Cpu::execute(const Opcode& opcode) {
-  if (opcode.match("00000000")) {
+  u8 byte = opcode.get();
+
+  if (byte == 0b00000000) {
     nop();
-  } else if (opcode.match("00xx0001")) {
+  } else if ((byte & 0b11001111) == 0b00000001) {
     load_r_n16(opcode);
-  } else if (opcode.match("00xx0010")) {
+  } else if ((byte & 0b11001111) == 0b00000010) {
     load_r_a(opcode);
-  } else if (opcode.match("00xx0011")) {
+  } else if ((byte & 0b11001111) == 0b00000011) {
     inc_r16(opcode);
-  } else if (opcode.match("00xxx100")) {
+  } else if ((byte & 0b11000111) == 0b00000100) {
     inc_r8(opcode);
-  } else if (opcode.match("00xxx101")) {
+  } else if ((byte & 0b11000111) == 0b00000101) {
     dec_r8(opcode);
-  } else if (opcode.match("00xxx110")) {
+  } else if ((byte & 0b11000111) == 0b00000110) {
     load_r_n8(opcode);
-  } else if (opcode.match("00000111")) {
+  } else if (byte == 0b00000111) {
     rlca();
-  } else if (opcode.match("00001000")) {
+  } else if (byte == 0b00001000) {
     load_n16_sp();
-  } else if (opcode.match("00xx1001")) {
+  } else if ((byte & 0b11001111) == 0b00001001) {
     add_hl_r(opcode);
-  } else if (opcode.match("00xx1010")) {
+  } else if ((byte & 0b11001111) == 0b00001010) {
     load_a_r(opcode);
-  } else if (opcode.match("00xx1011")) {
+  } else if ((byte & 0b11001111) == 0b00001011) {
     dec_r16(opcode);
-  } else if (opcode.match("00001111")) {
+  } else if (byte == 0b00001111) {
     rrca();
-  } else if (opcode.match("00010000")) {
+  } else if (byte == 0b00010000) {
     stop();
-  } else if (opcode.match("00010111")) {
+  } else if (byte == 0b00010111) {
     rla();
-  } else if (opcode.match("00011000")) {
+  } else if (byte == 0b00011000) {
     jr_n();
-  } else if (opcode.match("00011111")) {
+  } else if (byte == 0b00011111) {
     rra();
-  } else if (opcode.match("001xx000")) {
+  } else if ((byte & 0b11100111) == 0b00100000) {
     jr_cc_n(opcode);
-  } else if (opcode.match("00100111")) {
+  } else if (byte == 0b00100111) {
     daa();
-  } else if (opcode.match("00101111")) {
+  } else if (byte == 0b00101111) {
     cpl();
-  } else if (opcode.match("00110111")) {
+  } else if (byte == 0b00110111) {
     scf();
-  } else if (opcode.match("00111111")) {
+  } else if (byte == 0b00111111) {
     ccf();
-  } else if (opcode.match("01110110")) {
+  } else if (byte == 0b01110110) {
     halt();
-  } else if (opcode.match("01xxxyyy")) {
+  } else if ((byte & 0b11000000) == 0b01000000) {
     load_r_r(opcode);
-  } else if (opcode.match("10000xxx")) {
+  } else if ((byte & 0b11111000) == 0b10000000) {
     add_a_r(opcode);
-  } else if (opcode.match("10001xxx")) {
+  } else if ((byte & 0b11111000) == 0b10001000) {
     addc_a_r(opcode);
-  } else if (opcode.match("10010xxx")) {
+  } else if ((byte & 0b11111000) == 0b10010000) {
     sub_a_r(opcode);
-  } else if (opcode.match("10011xxx")) {
+  } else if ((byte & 0b11111000) == 0b10011000) {
     subc_a_r(opcode);
-  } else if (opcode.match("10100xxx")) {
+  } else if ((byte & 0b11111000) == 0b10100000) {
     and_a_r(opcode);
-  } else if (opcode.match("10101xxx")) {
+  } else if ((byte & 0b11111000) == 0b10101000) {
     xor_a_r(opcode);
-  } else if (opcode.match("10110xxx")) {
+  } else if ((byte & 0b11111000) == 0b10110000) {
     or_a_r(opcode);
-  } else if (opcode.match("10111xxx")) {
+  } else if ((byte & 0b11111000) == 0b10111000) {
     cp_a_r(opcode);
-  } else if (opcode.match("110xx000")) {
+  } else if ((byte & 0b11100111) == 0b11000000) {
     ret_cc(opcode);
-  } else if (opcode.match("11xx0001")) {
+  } else if ((byte & 0b11001111) == 0b11000001) {
     pop(opcode);
-  } else if (opcode.match("110xx010")) {
+  } else if ((byte & 0b11100111) == 0b11000010) {
     jp_cc_n16(opcode);
-  } else if (opcode.match("11000011")) {
+  } else if (byte == 0b11000011) {
     jp_n16();
-  } else if (opcode.match("11001011")) {
+  } else if (byte == 0b11001011) {
     Opcode next(fetch());
     execute_cb(next);
-  } else if (opcode.match("110xx100")) {
+  } else if ((byte & 0b11100111) == 0b11000100) {
     call_cc_n16(opcode);
-  } else if (opcode.match("11xx0101")) {
+  } else if ((byte & 0b11001111) == 0b11000101) {
     push(opcode);
-  } else if (opcode.match("11000110")) {
+  } else if (byte == 0b11000110) {
     add_a_n();
-  } else if (opcode.match("11xxx111")) {
+  } else if ((byte & 0b11000111) == 0b11000111) {
     rst_n(opcode);
-  } else if (opcode.match("11001001")) {
+  } else if (byte == 0b11001001) {
     ret();
-  } else if (opcode.match("11001101")) {
+  } else if (byte == 0b11001101) {
     call_n16();
-  } else if (opcode.match("11001110")) {
+  } else if (byte == 0b11001110) {
     addc_a_n();
-  } else if (opcode.match("11010110")) {
+  } else if (byte == 0b11010110) {
     sub_a_n();
-  } else if (opcode.match("11011001")) {
+  } else if (byte == 0b11011001) {
     reti();
-  } else if (opcode.match("11011110")) {
+  } else if (byte == 0b11011110) {
     subc_a_n();
-  } else if (opcode.match("11100000")) {
+  } else if (byte == 0b11100000) {
     load_n_a();
-  } else if (opcode.match("11100010")) {
+  } else if (byte == 0b11100010) {
     load_c_a();
-  } else if (opcode.match("11100110")) {
+  } else if (byte == 0b11100110) {
     and_a_n();
-  } else if (opcode.match("11101000")) {
+  } else if (byte == 0b11101000) {
     add_sp_n();
-  } else if (opcode.match("11101001")) {
+  } else if (byte == 0b11101001) {
     jp_hl();
-  } else if (opcode.match("11101010")) {
+  } else if (byte == 0b11101010) {
     load_n16_a();
-  } else if (opcode.match("11101110")) {
+  } else if (byte == 0b11101110) {
     xor_a_n();
-  } else if (opcode.match("11110000")) {
+  } else if (byte == 0b11110000) {
     load_a_n();
-  } else if (opcode.match("11110010")) {
+  } else if (byte == 0b11110010) {
     load_a_c();
-  } else if (opcode.match("11110011")) {
+  } else if (byte == 0b11110011) {
     di();
-  } else if (opcode.match("11110110")) {
+  } else if (byte == 0b11110110) {
     or_a_n();
-  } else if (opcode.match("11111000")) {
+  } else if (byte == 0b11111000) {
     load_hl_sp_n8();
-  } else if (opcode.match("11111001")) {
+  } else if (byte == 0b11111001) {
     load_sp_hl();
-  } else if (opcode.match("11111010")) {
+  } else if (byte == 0b11111010) {
     load_a_n16();
-  } else if (opcode.match("11111011")) {
+  } else if (byte == 0b11111011) {
     ei();
-  } else if (opcode.match("11111110")) {
+  } else if (byte == 0b11111110) {
     cp_a_n();
   } else {
     DLOG(WARNING) << "opcode " << opcode.get() << " not implemented."
@@ -222,27 +224,29 @@ void Cpu::execute(const Opcode& opcode) {
 }
 
 void Cpu::execute_cb(const Opcode& opcode) {
-  if (opcode.match("00000xxx")) {
+  u8 byte = opcode.get();
+
+  if ((byte & 0b11111000) == 0b00000000) {
     rlc_n(opcode);
-  } else if (opcode.match("00001xxx")) {
+  } else if ((byte & 0b11111000) == 0b00001000) {
     rrc_n(opcode);
-  } else if (opcode.match("00010xxx")) {
+  } else if ((byte & 0b11111000) == 0b00010000) {
     rl_n(opcode);
-  } else if (opcode.match("00011xxx")) {
+  } else if ((byte & 0b11111000) == 0b00011000) {
     rr_n(opcode);
-  } else if (opcode.match("00100xxx")) {
+  } else if ((byte & 0b11111000) == 0b00100000) {
     sla_n(opcode);
-  } else if (opcode.match("00101xxx")) {
+  } else if ((byte & 0b11111000) == 0b00101000) {
     sra_n(opcode);
-  } else if (opcode.match("00110xxx")) {
+  } else if ((byte & 0b11111000) == 0b00110000) {
     swap(opcode);
-  } else if (opcode.match("00111xxx")) {
+  } else if ((byte & 0b11111000) == 0b00111000) {
     srl_n(opcode);
-  } else if (opcode.match("01xxxyyy")) {
+  } else if ((byte & 0b11000000) == 0b01000000) {
     bit_b_r(opcode);
-  } else if (opcode.match("10xxxyyy")) {
+  } else if ((byte & 0b11000000) == 0b10000000) {
     res_b_r(opcode);
-  } else if (opcode.match("11xxxyyy")) {
+  } else if ((byte & 0b11000000) == 0b11000000) {
     set_b_r(opcode);
   } else {
     DCHECK(false);

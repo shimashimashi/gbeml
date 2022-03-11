@@ -6,7 +6,7 @@ namespace gbeml {
 
 #define kUnused(var) (void)var;
 #define WIDTH 160
-#define HEIGHT 140
+#define HEIGHT 144
 
 class MiniFbEvents {
  public:
