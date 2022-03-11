@@ -15,6 +15,7 @@ namespace gbeml {
 class MockDisplay : public Display {
  public:
   MOCK_METHOD3(render, void(u8 x, u8 y, Color pixel));
+  MOCK_METHOD0(getBuffer, u32*());
 };
 
 class MockVRam : public Ram {
@@ -80,6 +81,7 @@ TEST(PpuTest, moveNext) {
   for (u64 ly = 0; ly < 154; ly++) {
     for (u64 lx = 0; lx < 456; lx++) {
       if (ly < 144) {
+        EXPECT_EQ(ly, ppu.readLy());
         if (lx < 80) {
           EXPECT_EQ(PpuMode::OamScan, ppu.getMode());
         } else if (lx < 252) {

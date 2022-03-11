@@ -1,5 +1,5 @@
-#ifndef GBEML_MINIFB_DISPLAY_H_
-#define GBEML_MINIFB_DISPLAY_H_
+#ifndef GBEML_STUB_DISPLAY_H_
+#define GBEML_STUB_DISPLAY_H_
 
 #include <array>
 
@@ -9,9 +9,9 @@
 
 namespace gbeml {
 
-class MiniFbDisplay : public Display {
+class StubDisplay : public Display {
  public:
-  MiniFbDisplay() {}
+  StubDisplay() {}
   void render(u8 x, u8 y, Color pixel) override;
   u32* getBuffer() override;
 

@@ -126,6 +126,7 @@ bool MiniFbWindow::init() {
       std::bind(&MiniFbEvents::mouse_scroll, &e, _1, _2, _3, _4), window);
 
   mfb_set_user_data(window, (void *)"GB Test");
+  mfb_set_target_fps(60);
 
   return true;
 }

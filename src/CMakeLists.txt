@@ -61,6 +61,7 @@ add_executable(
     main.cc
     driver/minifb/minifb_display.cc
     driver/minifb/minifb_window.cc
+    driver/stub/stub_display.cc
 )
 target_link_libraries(gbeml gbeml_core minifb)
 target_compile_options(gbeml PRIVATE)
@@ -71,8 +72,8 @@ add_executable(
     core/register/register_test.cc
     core/cpu/alu_test.cc
     core/cpu/cpu_test.cc
-    core/cpu/opcode_test.cc
     core/graphics/ppu_test.cc
+    core/graphics/pixel_fifo_test.cc
 )
 target_link_libraries(
     gbeml_test
