@@ -1,18 +1,21 @@
 #ifndef GBEML_PPU_H_
 #define GBEML_PPU_H_
 
+#include <queue>
+#include <vector>
+
 #include "core/display/display.h"
 #include "core/graphics/color.h"
 #include "core/graphics/mode.h"
 #include "core/graphics/palette.h"
-#include "core/graphics/pixel_fifo.h"
+#include "core/graphics/pixel.h"
+#include "core/graphics/sprite.h"
+#include "core/graphics/tile.h"
 #include "core/interrupt/interrupt_controller.h"
 #include "core/memory/ram.h"
 #include "core/types/types.h"
 
 namespace gbeml {
-
-enum class ObjSize { Normal, Tall };
 
 class Lcdc {
  public:
@@ -23,13 +26,13 @@ class Lcdc {
 
   bool isLcdEnabled() const;
   bool isWindowEnabled() const;
-  bool isObjEnabled() const;
-  bool isBgEnabled() const;
+  bool isSpriteEnabled() const;
+  bool isBackgroundEnabled() const;
 
-  u16 windowTileMapArea() const;
+  u16 getWindowTileMapAddress(u16 offset) const;
   u16 getBackgroundTileDataAddress(u8 tile_number) const;
   u16 getBackgroundTileMapAddress(u16 offset) const;
-  ObjSize objSize() const;
+  SpriteSize spriteSize() const;
 
  private:
   Register flags;
@@ -59,11 +62,10 @@ class Ppu {
         oam(oam_),
         ic(ic_),
         lcdc(0),
-        lcdStat(0),
+        lcd_stat(0),
         bgp(0),
         obp0(0),
-        obp1(0),
-        background_fifo() {}
+        obp1(0) {}
 
   void tick();
   void init();
@@ -107,12 +109,16 @@ class Ppu {
   InterruptController* ic;
 
   Lcdc lcdc;
-  LcdStat lcdStat;
-  Palette bgp;
-  Palette obp0;
-  Palette obp1;
-  PixelFifo background_fifo;
+  LcdStat lcd_stat;
+  BackgroundPalette bgp;
+  SpritePalette obp0;
+  SpritePalette obp1;
   PpuMode mode;
+
+  std::queue<BackgroundPixel> background_fifo;
+  std::queue<SpritePixel> sprite_fifo;
+  std::vector<Sprite> sprite_buffer;
+  std::vector<Sprite> visible_sprites;
 
   u8 scy = 0;
   u8 scx = 0;
@@ -123,25 +129,38 @@ class Ppu {
 
   u8 fetcher_x = 0;
   u8 shifter_x = 0;
+  // 1-index
+  u8 window_line_counter = 0;
 
   u64 stalls = 0;
   u64 fetcher_stalls = 0;
   u8 num_unused_pixels = 0;
   u64 cycles = 0;
+  bool draw_window = false;
+  bool is_window_visible_vertically = false;
 
   void draw();
-  void fetchPixels();
+  void fetchBackgroundPixels();
+  void fetchWindowPixels();
+  void fetchSpritePixels();
   void shiftPixel();
+
+  void scanOam();
   void moveNext();
+  void initiateSpriteFetch();
+  bool reachWindow();
 
   void enterOamScan();
   void enterDrawing();
   void enterHBlank();
   void enterVBlank();
+  void enterWindow();
 
   u8 getBackgroundTileNumber();
-  u8 getBackgroundLowTileData(u8 tile_number);
-  u8 getBackgroundHighTileData(u8 tile_number);
+  u16 getBackgroundTileDataAddress(u8 tile_number);
+
+  u8 getWindowTileNumber();
+  u16 getWindowTileDataAddress(u8 tile_number);
 };
 
 }  // namespace gbeml

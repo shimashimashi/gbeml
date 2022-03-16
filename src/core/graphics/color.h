@@ -3,7 +3,7 @@
 
 namespace gbeml {
 
-enum class Color { White, LightGray, DarkGray, Black };
+enum class Color { White, LightGray, DarkGray, Black, Transparent };
 
 }  // namespace gbeml
 

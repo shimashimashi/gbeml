@@ -5,7 +5,7 @@
 namespace gbeml {
 
 void StubDisplay::render(u8 x, u8 y, Color pixel) {
-  u32 rgb;
+  u32 rgb = 0;
   switch (pixel) {
     case Color::White:
       rgb = 0xffffff;
@@ -18,6 +18,9 @@ void StubDisplay::render(u8 x, u8 y, Color pixel) {
       break;
     case Color::Black:
       rgb = 0x000000;
+      break;
+    default:
+      DCHECK(false);
       break;
   }
 

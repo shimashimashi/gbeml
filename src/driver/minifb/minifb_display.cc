@@ -19,6 +19,9 @@ void MiniFbDisplay::render(u8 x, u8 y, Color pixel) {
     case Color::Black:
       rgb = 0x000000;
       break;
+    default:
+      DCHECK(false);
+      break;
   }
 
   buffer[y * 160 + x] = rgb;
