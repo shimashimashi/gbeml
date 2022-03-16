@@ -9,11 +9,32 @@ namespace gbeml {
 
 class Palette {
  public:
-  Palette(u8 data_) : data(data_) {}
+  virtual ~Palette() {}
 
-  u8 read() const;
-  void write(u8 value);
-  Color getColor(u8 color_id);
+  virtual u8 read() const = 0;
+  virtual void write(u8 value) = 0;
+  virtual Color getColor(u8 color_index) const = 0;
+};
+
+class BackgroundPalette : public Palette {
+ public:
+  BackgroundPalette(u8 data_) : data(data_) {}
+
+  virtual u8 read() const override;
+  virtual void write(u8 value) override;
+  virtual Color getColor(u8 color_index) const override;
+
+ private:
+  Register data;
+};
+
+class SpritePalette : public Palette {
+ public:
+  SpritePalette(u8 data_) : data(data_) {}
+
+  virtual u8 read() const override;
+  virtual void write(u8 value) override;
+  virtual Color getColor(u8 color_index) const override;
 
  private:
   Register data;

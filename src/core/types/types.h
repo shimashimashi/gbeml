@@ -16,6 +16,7 @@ typedef int32_t i32;
 typedef int64_t i64;
 
 u16 concat(u8 h, u8 l);
+u16 interleave(u8 h, u8 l);
 
 }  // namespace gbeml
 
