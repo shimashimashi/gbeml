@@ -74,6 +74,7 @@ add_executable(
     core/register/register_test.cc
     core/cpu/alu_test.cc
     core/cpu/cpu_test.cc
+    core/graphics/palette_test.cc
     core/graphics/ppu_test.cc
     core/graphics/tile_test.cc
 )
