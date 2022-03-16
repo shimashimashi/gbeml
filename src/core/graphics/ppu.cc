@@ -162,7 +162,7 @@ u16 Ppu::getBackgroundTileDataAddress(u8 tile_number) {
 
 u8 Ppu::getWindowTileNumber() {
   u8 x = (fetcher_x & 0xff) / 8;
-  u8 y = (window_line_counter - 1 & 0xff) / 8;
+  u8 y = ((window_line_counter - 1) & 0xff) / 8;
   u16 offset = (x + y * 32) & 0x3ff;
   u16 addr = lcdc.getWindowTileMapAddress(offset);
   return vram->read(addr);
