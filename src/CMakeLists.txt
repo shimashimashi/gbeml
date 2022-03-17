@@ -28,6 +28,9 @@ add_library(
     core/cpu/alu.cc
     core/cpu/cpu.cc
     core/cpu/opcode.cc
+    core/graphics/fetcher.cc
+    core/graphics/lcdc.cc
+    core/graphics/lcd_stat.cc
     core/graphics/palette.cc
     core/graphics/pixel.cc
     core/graphics/ppu.cc
@@ -74,8 +77,11 @@ add_executable(
     core/register/register_test.cc
     core/cpu/alu_test.cc
     core/cpu/cpu_test.cc
+    core/graphics/lcdc_test.cc
+    core/graphics/lcd_stat_test.cc
     core/graphics/palette_test.cc
     core/graphics/ppu_test.cc
+    core/graphics/sprite_test.cc
     core/graphics/tile_test.cc
 )
 target_link_libraries(

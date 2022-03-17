@@ -6,6 +6,9 @@
 
 #include "core/display/display.h"
 #include "core/graphics/color.h"
+#include "core/graphics/fetcher.h"
+#include "core/graphics/lcd_stat.h"
+#include "core/graphics/lcdc.h"
 #include "core/graphics/mode.h"
 #include "core/graphics/palette.h"
 #include "core/graphics/pixel.h"
@@ -16,43 +19,6 @@
 #include "core/types/types.h"
 
 namespace gbeml {
-
-class Lcdc {
- public:
-  Lcdc(u8 flags_) : flags(flags_) {}
-
-  u8 read() const;
-  void write(u8 value);
-
-  bool isLcdEnabled() const;
-  bool isWindowEnabled() const;
-  bool isSpriteEnabled() const;
-  bool isBackgroundEnabled() const;
-
-  u16 getWindowTileMapAddress(u16 offset) const;
-  u16 getBackgroundTileDataAddress(u8 tile_number) const;
-  u16 getBackgroundTileMapAddress(u16 offset) const;
-  SpriteSize spriteSize() const;
-
- private:
-  Register flags;
-};
-
-class LcdStat {
- public:
-  LcdStat(u8 flags_) : flags(flags_) {}
-
-  u8 read() const;
-  void write(u8 value);
-
-  bool isLycEqualsLyInterruptEnabled() const;
-  bool isOamScanInterruptEnabled() const;
-  bool isVBlankInterruptEnabled() const;
-  bool isHBlankInterruptEnabled() const;
-
- private:
-  Register flags;
-};
 
 class Ppu {
  public:
@@ -65,7 +31,8 @@ class Ppu {
         lcd_stat(0),
         bgp(0),
         obp0(0),
-        obp1(0) {}
+        obp1(0),
+        pixel_fetcher(*vram, lcdc, bgp, obp0, obp1) {}
 
   void tick();
   void init();
@@ -114,6 +81,7 @@ class Ppu {
   SpritePalette obp0;
   SpritePalette obp1;
   PpuMode mode;
+  PixelFetcher pixel_fetcher;
 
   std::queue<BackgroundPixel> background_fifo;
   std::queue<SpritePixel> sprite_fifo;
@@ -127,7 +95,6 @@ class Ppu {
   u8 wy = 0;
   u8 wx = 0;
 
-  u8 fetcher_x = 0;
   u8 shifter_x = 0;
   // 1-index
   u8 window_line_counter = 0;
@@ -155,12 +122,6 @@ class Ppu {
   void enterHBlank();
   void enterVBlank();
   void enterWindow();
-
-  u8 getBackgroundTileNumber();
-  u16 getBackgroundTileDataAddress(u8 tile_number);
-
-  u8 getWindowTileNumber();
-  u16 getWindowTileDataAddress(u8 tile_number);
 };
 
 }  // namespace gbeml

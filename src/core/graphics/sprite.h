@@ -16,6 +16,7 @@ class Sprite {
   u8 getY() const;
   u8 getX() const;
   u8 getTileIndex() const;
+  u8 getPixelIndex(u8 current_x) const;
   bool isBackgroundOverSprite() const;
   bool flipY() const;
   bool flipX() const;
