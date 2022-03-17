@@ -1,61 +1,8 @@
 #include "core/graphics/ppu.h"
 
-#include <array>
-#include <cassert>
-#include <cstdio>
-
 #include "glog/logging.h"
 
 namespace gbeml {
-
-u8 Lcdc::read() const { return flags.get(); }
-
-void Lcdc::write(u8 value) { return flags.set(value); }
-
-bool Lcdc::isLcdEnabled() const { return flags.getAt(7); }
-
-u16 Lcdc::getWindowTileMapAddress(u16 offset) const {
-  u16 base = flags.getAt(6) ? 0x1c00 : 0x1800;
-  return base + offset;
-}
-
-bool Lcdc::isWindowEnabled() const { return flags.getAt(5); }
-
-u16 Lcdc::getBackgroundTileDataAddress(u8 tile_number) const {
-  if (flags.getAt(4)) {
-    return tile_number * 16;
-  } else {
-    return static_cast<u16>(0x1000 + static_cast<i8>(tile_number) * 16);
-  }
-}
-
-u16 Lcdc::getBackgroundTileMapAddress(u16 offset) const {
-  u16 base = flags.getAt(3) ? 0x1c00 : 0x1800;
-  return base + offset;
-}
-
-SpriteSize Lcdc::spriteSize() const {
-  return flags.getAt(2) ? SpriteSize::Tall : SpriteSize::Short;
-}
-
-bool Lcdc::isSpriteEnabled() const { return flags.getAt(1); }
-
-bool Lcdc::isBackgroundEnabled() const { return flags.getAt(0); }
-
-u8 LcdStat::read() const {
-  // clear lower 3 bits to be set later.
-  return flags.get() & 0b11111000;
-}
-
-void LcdStat::write(u8 value) { return flags.set(value); }
-
-bool LcdStat::isLycEqualsLyInterruptEnabled() const { return flags.getAt(6); }
-
-bool LcdStat::isOamScanInterruptEnabled() const { return flags.getAt(5); }
-
-bool LcdStat::isVBlankInterruptEnabled() const { return flags.getAt(4); }
-
-bool LcdStat::isHBlankInterruptEnabled() const { return flags.getAt(3); }
 
 void Ppu::tick() {
   if (!lcdc.isLcdEnabled()) {
@@ -63,14 +10,13 @@ void Ppu::tick() {
   }
 
   switch (mode) {
-    case PpuMode::OamScan:
-      break;
     case PpuMode::Drawing:
       draw();
       break;
+    case PpuMode::OamScan:
     case PpuMode::HBlank:
-      break;
     case PpuMode::VBlank:
+      break;
       break;
   }
 
@@ -146,94 +92,37 @@ void Ppu::draw() {
   shiftPixel();
 }
 
-u8 Ppu::getBackgroundTileNumber() {
-  u8 x = ((scx + fetcher_x) & 0xff) / 8;
-  u8 y = ((scy + ly) & 0xff) / 8;
-  u16 offset = (x + y * 32) & 0x3ff;
-  u16 addr = lcdc.getBackgroundTileMapAddress(offset);
-  return vram->read(addr);
-}
-
-u16 Ppu::getBackgroundTileDataAddress(u8 tile_number) {
-  u16 base = lcdc.getBackgroundTileDataAddress(tile_number);
-  u16 offset = 2 * ((ly + scy) % 8);
-  return base + offset;
-}
-
-u8 Ppu::getWindowTileNumber() {
-  u8 x = (fetcher_x & 0xff) / 8;
-  u8 y = ((window_line_counter - 1) & 0xff) / 8;
-  u16 offset = (x + y * 32) & 0x3ff;
-  u16 addr = lcdc.getWindowTileMapAddress(offset);
-  return vram->read(addr);
-}
-
-u16 Ppu::getWindowTileDataAddress(u8 tile_number) {
-  u16 base = lcdc.getBackgroundTileDataAddress(tile_number);
-  u16 offset = 2 * ((window_line_counter - 1) % 8);
-  return base + offset;
-}
-
 void Ppu::fetchBackgroundPixels() {
-  u8 tile_number = getBackgroundTileNumber();
-  u16 addr = getBackgroundTileDataAddress(tile_number);
+  Tile tile = pixel_fetcher.fetchBackgroundPixels(scx, scy, ly);
 
-  u8 low = vram->read(addr);
-  u8 high = vram->read(addr + 1);
-
-  Tile tile(low, high, bgp);
   for (u8 i = 0; i < 8; ++i) {
     Color color = tile.getAt(i);
     background_fifo.push(color);
   }
 
-  fetcher_x += 8;
+  while (num_unused_pixels > 0) {
+    background_fifo.pop();
+    num_unused_pixels--;
+  }
 }
 
 void Ppu::fetchWindowPixels() {
-  u8 tile_number = getWindowTileNumber();
-  u16 addr = getWindowTileDataAddress(tile_number);
+  Tile tile = pixel_fetcher.fetchWindowPixels(window_line_counter - 1);
 
-  u8 low = vram->read(addr);
-  u8 high = vram->read(addr + 1);
-
-  Tile tile(low, high, bgp);
   for (u8 i = 0; i < 8; ++i) {
     Color color = tile.getAt(i);
     background_fifo.push(color);
   }
 
-  fetcher_x += 8;
+  while (num_unused_pixels > 0) {
+    background_fifo.pop();
+    num_unused_pixels--;
+  }
 }
 
 void Ppu::fetchSpritePixels() {
-  std::vector<SpritePixel> pixels(8, SpritePixel(Color::Transparent, true));
-
-  for (const Sprite& sprite : visible_sprites) {
-    u16 addr = sprite.getTileDataAddress(ly, lcdc.spriteSize());
-    u8 low = vram->read(addr);
-    u8 high = vram->read(addr + 1);
-    SpritePalette& palette = sprite.getPaletteNumber() ? obp1 : obp0;
-
-    Tile tile(low, high, palette);
-    if (sprite.flipX()) {
-      tile.reverse();
-    }
-
-    for (u8 i = 0; i < 8; ++i) {
-      if (pixels[i].getColor() != Color::Transparent) {
-        continue;
-      }
-      if (shifter_x + i >= sprite.getX()) {
-        continue;
-      }
-      Color color = tile.getAt(shifter_x + i - sprite.getX() + 8);
-      if (color != Color::Transparent) {
-        pixels[i] = SpritePixel(color, sprite.isBackgroundOverSprite());
-      }
-    }
-  }
-
+  std::vector<SpritePixel> pixels =
+      pixel_fetcher.fetchSpritePixels(shifter_x, ly, visible_sprites);
   visible_sprites.clear();
 
   u64 num_skip = sprite_fifo.size();
@@ -253,11 +142,6 @@ void Ppu::shiftPixel() {
 
   BackgroundPixel background_pixel = background_fifo.front();
   background_fifo.pop();
-
-  if (num_unused_pixels > 0) {
-    num_unused_pixels--;
-    return;
-  }
 
   Color color = background_pixel.getColor();
   if (!lcdc.isBackgroundEnabled()) {
@@ -347,7 +231,7 @@ void Ppu::enterDrawing() {
   mode = PpuMode::Drawing;
   stalls = 12;
   shifter_x = 0;
-  fetcher_x = 0;
+  pixel_fetcher.reset();
   fetchBackgroundPixels();
   num_unused_pixels = scx % 8;
 }
@@ -382,7 +266,7 @@ void Ppu::enterWindow() {
   while (background_fifo.size() > 0) {
     background_fifo.pop();
   }
-  fetcher_x = 0;
+  pixel_fetcher.reset();
   if (wx < 7) {
     num_unused_pixels = 7 - wx;
   }

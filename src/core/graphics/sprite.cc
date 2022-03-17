@@ -16,6 +16,8 @@ bool Sprite::flipX() const { return flags.getAt(5); }
 
 bool Sprite::getPaletteNumber() const { return flags.getAt(4); }
 
+u8 Sprite::getPixelIndex(u8 current_x) const { return current_x - (x - 8); }
+
 bool Sprite::isVisibleVertically(u8 ly, SpriteSize size) const {
   if (x == 0) {
     return false;
@@ -34,7 +36,7 @@ bool Sprite::isVisibleVertically(u8 ly, SpriteSize size) const {
 }
 
 bool Sprite::isVisibleHorizontally(u8 current_x) const {
-  return current_x >= x - 8;
+  return current_x >= x - 8 && current_x < x;
 }
 
 u16 Sprite::getTileDataAddress(u8 ly, SpriteSize size) const {
