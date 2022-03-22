@@ -8,6 +8,7 @@
 #include "core/display/display.h"
 #include "core/graphics/ppu.h"
 #include "core/interrupt/interrupt_controller.h"
+#include "core/joypad/joypad.h"
 #include "core/memory/mbc.h"
 #include "core/memory/ram.h"
 #include "core/memory/rom.h"
@@ -22,6 +23,8 @@ class GameBoy {
   void tick();
   bool init(const std::string& filename);
   Display* getDisplay() const;
+  void press(JoypadButton button);
+  void release(JoypadButton button);
 
  private:
   Display* display;
@@ -36,6 +39,7 @@ class GameBoy {
   Ram* oam;
   InterruptController* ic;
   Timer* timer;
+  Joypad* joypad;
 
   i32 breakpoint;
 };

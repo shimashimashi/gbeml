@@ -1,5 +1,6 @@
 #include <MiniFB.h>
 
+#include "core/gameboy.h"
 #include "core/types/types.h"
 
 namespace gbeml {
@@ -10,6 +11,8 @@ namespace gbeml {
 
 class MiniFbEvents {
  public:
+  MiniFbEvents(GameBoy *gb_) : gb(gb_){};
+
   void active(struct mfb_window *window, bool isActive);
 
   void resize(struct mfb_window *window, int width, int height);
@@ -28,10 +31,15 @@ class MiniFbEvents {
 
   void mouse_scroll(struct mfb_window *window, mfb_key_mod mod, float deltaX,
                     float deltaY);
+
+ private:
+  GameBoy *gb;
 };
 
 class MiniFbWindow {
  public:
+  MiniFbWindow(GameBoy *gb_) : gb(gb_), events(gb_){};
+
   bool init();
 
   bool waitSync();
@@ -39,7 +47,9 @@ class MiniFbWindow {
   bool update(u32 *buffer);
 
  private:
+  GameBoy *gb;
   struct mfb_window *window;
+  MiniFbEvents events;
 };
 
 }  // namespace gbeml
