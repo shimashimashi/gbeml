@@ -34,11 +34,14 @@ add_library(
     core/graphics/palette.cc
     core/graphics/pixel.cc
     core/graphics/ppu.cc
+    core/graphics/ppu_impl.cc
     core/graphics/sprite.cc
     core/graphics/tile.cc
     core/display/display.cc
     core/timer/timer.cc
     core/timer/timer_impl.cc
+    core/joypad/joypad.cc
+    core/joypad/joypad_impl.cc
 )
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     target_compile_options(
@@ -73,6 +76,7 @@ target_compile_options(gbeml PRIVATE)
 
 add_executable(
     gbeml_test
+    core/bus/bus_impl_test.cc
     core/types/types_test.cc
     core/register/register_test.cc
     core/cpu/alu_test.cc
@@ -80,9 +84,10 @@ add_executable(
     core/graphics/lcdc_test.cc
     core/graphics/lcd_stat_test.cc
     core/graphics/palette_test.cc
-    core/graphics/ppu_test.cc
+    core/graphics/ppu_impl_test.cc
     core/graphics/sprite_test.cc
     core/graphics/tile_test.cc
+    core/joypad/joypad_impl_test.cc
 )
 target_link_libraries(
     gbeml_test

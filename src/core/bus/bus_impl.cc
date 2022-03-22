@@ -2,18 +2,17 @@
 
 #include <glog/logging.h>
 
-#include <cstdio>
 #include <iostream>
 
 namespace gbeml {
 
 u8 BusImpl::read(u16 addr) const {
   if (addr <= 0x7fff) {
-    return mbc->read(addr);
+    return mbc->readRom(addr);
   } else if (addr <= 0x9fff) {
     return ppu->readVram(addr - 0x8000);
   } else if (addr <= 0xbfff) {
-    return mbc->read(addr);
+    return mbc->readRam(addr - 0xa000);
   } else if (addr <= 0xdfff) {
     return wram->read(addr - 0xc000);
   } else if (addr <= 0xfdff) {
@@ -21,8 +20,10 @@ u8 BusImpl::read(u16 addr) const {
   } else if (addr <= 0xfe9f) {
     return ppu->readOam(addr - 0xfe00);
   } else if (addr <= 0xfeff) {
-    fprintf(stderr, "Address %x is not usable\n", addr);
+    DLOG(WARNING) << "Address " << addr << " is not usable" << std::endl;
     return 0x00;
+  } else if (addr == 0xff00) {
+    return joypad->read();
   } else if (addr == 0xff04) {
     return timer->readDivider();
   } else if (addr == 0xff05) {
@@ -58,25 +59,25 @@ u8 BusImpl::read(u16 addr) const {
   } else if (addr == 0xff4b) {
     return ppu->readWx();
   } else if (addr <= 0xff7f) {
-    fprintf(stderr, "Not implemented to read %x\n", addr);
+    DLOG(WARNING) << "Not implemented to read " << addr << "." << std::endl;
     return 0x00;
   } else if (addr <= 0xfffe) {
     return hram->read(addr - 0xff80);
   } else if (addr == 0xffff) {
     return ic->readInterruptEnable();
   } else {
-    fprintf(stderr, "Not implemented to read %x\n", addr);
+    DLOG(WARNING) << "Not implemented to read " << addr << "." << std::endl;
     return 0x00;
   }
 }
 
 void BusImpl::write(u16 addr, u8 value) {
   if (addr <= 0x7fff) {
-    mbc->write(addr, value);
+    mbc->writeRom(addr, value);
   } else if (addr <= 0x9fff) {
     ppu->writeVram(addr - 0x8000, value);
   } else if (addr <= 0xbfff) {
-    mbc->write(addr, value);
+    mbc->writeRam(addr - 0xa000, value);
   } else if (addr <= 0xdfff) {
     wram->write(addr - 0xc000, value);
   } else if (addr <= 0xfdff) {
@@ -84,11 +85,13 @@ void BusImpl::write(u16 addr, u8 value) {
   } else if (addr <= 0xfe9f) {
     ppu->writeOam(addr - 0xfe00, value);
   } else if (addr <= 0xfeff) {
-    fprintf(stderr, "Address %x is not usable\n", addr);
+    DLOG(WARNING) << "Address " << addr << " is not usable." << std::endl;
+  } else if (addr == 0xff00) {
+    joypad->write(value);
   } else if (addr == 0xff01) {
-    DLOG(INFO) << "0xff01: " << value << std::endl;
+    DLOG(WARNING) << "Not implemented to write " << addr << "." << std::endl;
   } else if (addr == 0xff02) {
-    DLOG(INFO) << "0xff02: " << (int)value << std::endl;
+    DLOG(WARNING) << "Not implemented to write " << addr << "." << std::endl;
   } else if (addr == 0xff04) {
     timer->resetDivider();
   } else if (addr == 0xff05) {
@@ -112,7 +115,7 @@ void BusImpl::write(u16 addr, u8 value) {
   } else if (addr == 0xff45) {
     ppu->writeLyc(value);
   } else if (addr == 0xff46) {
-    dma(value);
+    enterDma(value);
   } else if (addr == 0xff47) {
     ppu->writeBgp(value);
   } else if (addr == 0xff48) {
@@ -124,13 +127,13 @@ void BusImpl::write(u16 addr, u8 value) {
   } else if (addr == 0xff4b) {
     ppu->writeWx(value);
   } else if (addr <= 0xff7f) {
-    fprintf(stderr, "Not implemented to write %x\n", addr);
+    DLOG(WARNING) << "Not implemented to write " << addr << "." << std::endl;
   } else if (addr <= 0xfffe) {
     hram->write(addr - 0xff80, value);
   } else if (addr == 0xffff) {
     ic->writeInterruptEnable(value);
   } else {
-    fprintf(stderr, "Not implemented to write %x\n", addr);
+    DLOG(WARNING) << "Not implemented to write " << addr << "." << std::endl;
   }
 }
 
@@ -140,27 +143,30 @@ void BusImpl::tick() {
     return;
   }
 
-  if (!is_transfering) {
-    return;
+  switch (mode) {
+    case BusMode::Dma:
+      transfer();
+      break;
+    case BusMode::Normal:
+      break;
   }
-
-  transfer();
-
-  stalls += 4;
 }
 
-void BusImpl::dma(u8 value) {
-  is_transfering = true;
+void BusImpl::enterDma(u8 value) {
+  mode = BusMode::Dma;
   dma_source_address = concat(value, 0x00);
+  transfer();
 }
 
 void BusImpl::transfer() {
-  u16 addr = concat(0xfe, static_cast<u8>(dma_source_address & 0xff));
+  u16 addr = dma_source_address & 0xff;
   ppu->writeOam(addr, read(dma_source_address));
-  if ((dma_source_address & 0xff) == 0xff) {
-    is_transfering = false;
+  if ((dma_source_address & 0xff) == 0x9f) {
+    mode = BusMode::Normal;
+    return;
   }
   dma_source_address++;
+  stalls += 3;
 }
 
 }  // namespace gbeml

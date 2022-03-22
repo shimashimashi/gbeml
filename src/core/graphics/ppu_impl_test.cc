@@ -1,11 +1,10 @@
-#include "core/graphics/ppu.h"
+#include "core/graphics/ppu_impl.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "core/display/display.h"
 #include "core/graphics/color.h"
-#include "core/graphics/mode.h"
 #include "core/interrupt/interrupt_controller_impl.h"
 #include "core/memory/ram.h"
 #include "core/types/types.h"
@@ -35,7 +34,7 @@ TEST(PpuTest, moveNext) {
   MockVRam vram;
   MockOam oam;
   InterruptControllerImpl ic;
-  Ppu ppu(&display, &vram, &oam, &ic);
+  PpuImpl ppu(&display, &vram, &oam, &ic);
 
   EXPECT_CALL(display, render(testing::_, testing::_, testing::_))
       .Times(testing::AnyNumber());
@@ -54,7 +53,7 @@ TEST(PpuTest, moveNext) {
         if (lx < 80) {
           EXPECT_EQ(PpuMode::OamScan, ppu.getMode());
         } else if (lx < 252) {
-          EXPECT_EQ(PpuMode::Drawing, ppu.getMode());
+          EXPECT_EQ(PpuMode::DrawingBackground, ppu.getMode());
         } else {
           EXPECT_EQ(PpuMode::HBlank, ppu.getMode());
         }
@@ -72,7 +71,7 @@ TEST(PpuTest, drawWindow) {
   MockVRam vram;
   MockOam oam;
   InterruptControllerImpl ic;
-  Ppu ppu(&display, &vram, &oam, &ic);
+  PpuImpl ppu(&display, &vram, &oam, &ic);
 
   EXPECT_CALL(display, render(0, 0, Color::White)).Times(1);
   EXPECT_CALL(vram, read(testing::_)).Times(testing::AnyNumber());
@@ -86,11 +85,9 @@ TEST(PpuTest, drawWindow) {
 
   EXPECT_EQ(PpuMode::OamScan, ppu.getMode());
   for (u64 ly = 0; ly < 80; ly++) {
-    EXPECT_EQ(PpuMode::OamScan, ppu.getMode());
     ppu.tick();
   }
   for (u64 ly = 0; ly < 18; ly++) {
-    EXPECT_EQ(PpuMode::Drawing, ppu.getMode());
     ppu.tick();
   }
   ppu.tick();
@@ -101,7 +98,7 @@ TEST(PpuTest, drawSprite) {
   MockVRam vram;
   MockOam oam;
   InterruptControllerImpl ic;
-  Ppu ppu(&display, &vram, &oam, &ic);
+  PpuImpl ppu(&display, &vram, &oam, &ic);
 
   EXPECT_CALL(display, render(0, 0, Color::Black)).Times(1);
   EXPECT_CALL(vram, read(0)).WillOnce(testing::Return(0b10000000));
@@ -118,13 +115,10 @@ TEST(PpuTest, drawSprite) {
   ppu.writeObp0(0b11000000);
   ppu.init();
 
-  EXPECT_EQ(PpuMode::OamScan, ppu.getMode());
   for (u64 ly = 0; ly < 80; ly++) {
-    EXPECT_EQ(PpuMode::OamScan, ppu.getMode());
     ppu.tick();
   }
   for (u64 ly = 0; ly < 23; ly++) {
-    EXPECT_EQ(PpuMode::Drawing, ppu.getMode());
     ppu.tick();
   }
   ppu.tick();

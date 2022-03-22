@@ -24,7 +24,7 @@ void runStub(gbeml::GameBoy *gb) {
 }
 
 void runMiniFb(gbeml::GameBoy *gb) {
-  gbeml::MiniFbWindow window;
+  gbeml::MiniFbWindow window(gb);
 
   if (!window.init()) {
     std::cerr << "Failed to initialize window." << std::endl;

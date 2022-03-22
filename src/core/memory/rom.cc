@@ -1,14 +1,16 @@
 #include "core/memory/rom.h"
 
+#include <glog/logging.h>
+
 #include <cassert>
-#include <cstdio>
 #include <fstream>
 
 namespace gbeml {
 
 u8 Rom::read(const u16 addr) const {
-  if (addr >= rom_size) {
-    assert(false);
+  if (addr >= data.size()) {
+    DCHECK(false);
+    return 0x00;
   }
   return data[addr];
 }
@@ -16,7 +18,7 @@ u8 Rom::read(const u16 addr) const {
 void Rom::load(const std::string &filename) {
   std::ifstream fin(filename, std::ios::in | std::ios::binary);
   if (!fin) {
-    fprintf(stderr, "Cannot read file: %s.\n", filename.c_str());
+    DCHECK(false);
     return;
   }
 
@@ -29,18 +31,21 @@ void Rom::load(const std::string &filename) {
     data.push_back(byte);
   }
   fin.close();
-
-  setHeaders();
 }
 
 bool Rom::isValid() {
-  if (data.size() != rom_size) {
-    fprintf(stderr, "Cartridge size is invalid. actual = %zu, expected = %u.\n",
-            data.size(), rom_size);
+  if (data.size() < 336) {
+    DCHECK(false);
+    return false;
+  }
+
+  if (data.size() != getRomSize()) {
+    DCHECK(false);
     return false;
   }
 
   if (!verifyHeaderChecksum()) {
+    DCHECK(false);
     return false;
   }
 
@@ -52,66 +57,16 @@ bool Rom::verifyHeaderChecksum() {
   for (u16 i = 0x134; i <= 0x14c; ++i) {
     x = x - data[i] - 1;
   }
-  if (x != header_checksum) {
-    fprintf(stderr, "Invalid Header checksum. actual = %x, expected = %x.\n", x,
-            header_checksum);
+  if (x != getHeaderChecksum()) {
+    DCHECK(false);
     return false;
   }
   return true;
 }
 
-void Rom::setHeaders() {
-  if (data.size() < 336) {
-    fprintf(stderr, "Cartridge size too short: %zu bytes.\n", data.size());
-    return;
-  }
-
-  for (u64 i = 0; i < 4; ++i) {
-    entry_point[i] = data[0x100 + i];
-  }
-
-  for (u64 i = 0; i < 49; ++i) {
-    nintendo_logo[i] = data[0x104 + i];
-  }
-
-  for (u64 i = 0; i < 17; ++i) {
-    title[i] = data[0x134 + i];
-  }
-
-  for (u64 i = 0; i < 4; ++i) {
-    manufacturer_code[i] = data[0x13f + i];
-  }
-
-  cgb_flag = data[0x143];
-
-  for (u64 i = 0; i < 2; ++i) {
-    new_licensee_code[i] = data[0x144 + i];
-  }
-
-  sgb_flag = data[0x146];
-
-  setCartridgeType(data[0x147]);
-
-  setRomSize(data[0x148]);
-
-  setRamSize(data[0x149]);
-
-  destination_code = data[0x14a];
-
-  old_licensee_code = data[0x14b];
-
-  mask_rom_version_number = data[0x14c];
-
-  header_checksum = data[0x14d];
-
-  for (u64 i = 0; i < 2; ++i) {
-    global_checksum[i] = data[0x14e + i];
-  }
-}
-
-void Rom::setRomSize(u8 code) {
+u32 Rom::getRomSize() const {
   u64 num_banks = 0;
-  switch (code) {
+  switch (data[0x148]) {
     case 0x00:
       num_banks = 2;
       break;
@@ -149,16 +104,17 @@ void Rom::setRomSize(u8 code) {
       num_banks = 96;
       break;
     default:
-      fprintf(stderr, "Invalid rom size: %x.\n", code);
-      assert(false);
+      DCHECK(false);
+      break;
   }
 
-  rom_size = static_cast<u32>(16 * 1024 * num_banks);
+  return static_cast<u32>(16 * 1024 * num_banks);
 }
 
-void Rom::setRamSize(u8 code) {
+u32 Rom::getRamSize() const {
   u64 num_banks = 0;
-  switch (code) {
+
+  switch (data[0x149]) {
     case 0:
       num_banks = 0;
       break;
@@ -175,26 +131,26 @@ void Rom::setRamSize(u8 code) {
       num_banks = 8;
       break;
     default:
-      fprintf(stderr, "Invalid ram size: %x.\n", code);
-      assert(false);
+      DCHECK(false);
       break;
   }
 
-  ram_size = static_cast<u32>(8 * 1024 * num_banks);
+  return static_cast<u32>(8 * 1024 * num_banks);
 }
 
-void Rom::setCartridgeType(u8 code) {
-  switch (code) {
-    case 0:
-      cartridgeType = CartridgeType::RomOnly;
-      return;
-    case 1:
-      cartridgeType = CartridgeType::Mbc1;
-      return;
+u8 Rom::getHeaderChecksum() const { return data[0x14d]; }
+
+CartridgeType Rom::getCartridgeType() const {
+  switch (data[0x147]) {
+    case 0x00:
+      return CartridgeType::RomOnly;
+    case 0x01:
+    case 0x02:
+    case 0x03:
+      return CartridgeType::Mbc1;
     default:
-      fprintf(stderr, "Cartridge type %x not implemented.\n", code);
-      assert(false);
-      return;
+      DCHECK(false);
+      return CartridgeType::RomOnly;
   }
 }
 

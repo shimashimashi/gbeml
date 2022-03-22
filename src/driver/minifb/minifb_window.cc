@@ -2,6 +2,8 @@
 
 #include <cstdio>
 
+#include "core/joypad/joypad.h"
+
 namespace gbeml {
 
 void MiniFbEvents::active(struct mfb_window *window, bool isActive) {
@@ -52,6 +54,68 @@ void MiniFbEvents::keyboard(struct mfb_window *window, mfb_key key,
           window_title, mfb_get_key_name(key), isPressed, mod);
   if (key == KB_KEY_ESCAPE) {
     mfb_close(window);
+  }
+
+  if (!isPressed) {
+    switch (key) {
+      case KB_KEY_ENTER:
+        gb->release(JoypadButton::Start);
+        break;
+      case KB_KEY_LEFT_SHIFT:
+      case KB_KEY_RIGHT_SHIFT:
+        gb->release(JoypadButton::Select);
+        break;
+      case KB_KEY_X:
+        gb->release(JoypadButton::A);
+        break;
+      case KB_KEY_Z:
+        gb->release(JoypadButton::B);
+        break;
+      case KB_KEY_UP:
+        gb->release(JoypadButton::Up);
+        break;
+      case KB_KEY_DOWN:
+        gb->release(JoypadButton::Down);
+        break;
+      case KB_KEY_LEFT:
+        gb->release(JoypadButton::Left);
+        break;
+      case KB_KEY_RIGHT:
+        gb->release(JoypadButton::Right);
+        break;
+      default:
+        break;
+    }
+  } else {
+    switch (key) {
+      case KB_KEY_ENTER:
+        gb->press(JoypadButton::Start);
+        break;
+      case KB_KEY_LEFT_SHIFT:
+      case KB_KEY_RIGHT_SHIFT:
+        gb->press(JoypadButton::Select);
+        break;
+      case KB_KEY_X:
+        gb->press(JoypadButton::A);
+        break;
+      case KB_KEY_Z:
+        gb->press(JoypadButton::B);
+        break;
+      case KB_KEY_UP:
+        gb->press(JoypadButton::Up);
+        break;
+      case KB_KEY_DOWN:
+        gb->press(JoypadButton::Down);
+        break;
+      case KB_KEY_LEFT:
+        gb->press(JoypadButton::Left);
+        break;
+      case KB_KEY_RIGHT:
+        gb->press(JoypadButton::Right);
+        break;
+      default:
+        break;
+    }
   }
 }
 
@@ -106,24 +170,23 @@ bool MiniFbWindow::init() {
   window = mfb_open_ex("GB Test", WIDTH, HEIGHT, WF_RESIZABLE);
   if (!window) return false;
 
-  MiniFbEvents e;
-
   using namespace std::placeholders;
 
-  mfb_set_active_callback(std::bind(&MiniFbEvents::active, &e, _1, _2), window);
-  mfb_set_resize_callback(std::bind(&MiniFbEvents::resize, &e, _1, _2, _3),
+  mfb_set_active_callback(std::bind(&MiniFbEvents::active, &events, _1, _2),
                           window);
-  mfb_set_close_callback(std::bind(&MiniFbEvents::close, &e, _1), window);
+  mfb_set_resize_callback(std::bind(&MiniFbEvents::resize, &events, _1, _2, _3),
+                          window);
+  mfb_set_close_callback(std::bind(&MiniFbEvents::close, &events, _1), window);
   mfb_set_keyboard_callback(
-      std::bind(&MiniFbEvents::keyboard, &e, _1, _2, _3, _4), window);
-  mfb_set_char_input_callback(std::bind(&MiniFbEvents::char_input, &e, _1, _2),
-                              window);
+      std::bind(&MiniFbEvents::keyboard, &events, _1, _2, _3, _4), window);
+  mfb_set_char_input_callback(
+      std::bind(&MiniFbEvents::char_input, &events, _1, _2), window);
   mfb_set_mouse_button_callback(
-      std::bind(&MiniFbEvents::mouse_button, &e, _1, _2, _3, _4), window);
+      std::bind(&MiniFbEvents::mouse_button, &events, _1, _2, _3, _4), window);
   mfb_set_mouse_move_callback(
-      std::bind(&MiniFbEvents::mouse_move, &e, _1, _2, _3), window);
+      std::bind(&MiniFbEvents::mouse_move, &events, _1, _2, _3), window);
   mfb_set_mouse_scroll_callback(
-      std::bind(&MiniFbEvents::mouse_scroll, &e, _1, _2, _3, _4), window);
+      std::bind(&MiniFbEvents::mouse_scroll, &events, _1, _2, _3, _4), window);
 
   mfb_set_user_data(window, (void *)"GB Test");
   mfb_set_target_fps(60);

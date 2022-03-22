@@ -3,7 +3,9 @@
 #include <debugbreak.h>
 
 #include "core/bus/bus_impl.h"
+#include "core/graphics/ppu_impl.h"
 #include "core/interrupt/interrupt_controller_impl.h"
+#include "core/joypad/joypad_impl.h"
 #include "core/memory/ram_impl.h"
 #include "core/timer/timer_impl.h"
 
@@ -19,6 +21,7 @@ void GameBoy::tick() {
 bool GameBoy::init(const std::string& filename) {
   ic = new InterruptControllerImpl(0xe1, 0x00);
   timer = new TimerImpl(ic, 0xab, 0x00, 0x00, 0xf8);
+  joypad = new JoypadImpl(ic);
 
   rom = new Rom();
   rom->load(filename);
@@ -26,7 +29,7 @@ bool GameBoy::init(const std::string& filename) {
     return false;
   }
 
-  switch (rom->cartridgeType) {
+  switch (rom->getCartridgeType()) {
     case CartridgeType::RomOnly:
       mbc = new RomOnly(*rom);
       break;
@@ -40,8 +43,8 @@ bool GameBoy::init(const std::string& filename) {
   vram = new RamImpl(8 * 1024);
   oam = new RamImpl(160);
 
-  ppu = new Ppu(display, vram, oam, ic);
-  bus = new BusImpl(mbc, wram, hram, ppu, timer, ic);
+  ppu = new PpuImpl(display, vram, oam, ic);
+  bus = new BusImpl(mbc, wram, hram, ppu, timer, ic, joypad);
   cpu = new Cpu(bus, ic);
 
   cpu->set_a(0x01);
@@ -71,5 +74,9 @@ bool GameBoy::init(const std::string& filename) {
 }
 
 Display* GameBoy::getDisplay() const { return display; }
+
+void GameBoy::press(JoypadButton button) { joypad->press(button); }
+
+void GameBoy::release(JoypadButton button) { joypad->release(button); }
 
 }  // namespace gbeml
