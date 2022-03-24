@@ -45,6 +45,7 @@ TEST(PpuTest, moveNext) {
   ppu.writeLcdc(0b10000001);
   ppu.init();
 
+  EXPECT_EQ(0b10000001, ppu.readLcdc());
   EXPECT_EQ(PpuMode::OamScan, ppu.getMode());
   for (u64 ly = 0; ly < 154; ly++) {
     for (u64 lx = 0; lx < 456; lx++) {
@@ -52,8 +53,11 @@ TEST(PpuTest, moveNext) {
         EXPECT_EQ(ly, ppu.readLy());
         if (lx < 80) {
           EXPECT_EQ(PpuMode::OamScan, ppu.getMode());
+          EXPECT_EQ(0xff, ppu.readOam(0));
         } else if (lx < 252) {
           EXPECT_EQ(PpuMode::DrawingBackground, ppu.getMode());
+          EXPECT_EQ(0xff, ppu.readVram(0));
+          EXPECT_EQ(0xff, ppu.readOam(0));
         } else {
           EXPECT_EQ(PpuMode::HBlank, ppu.getMode());
         }
@@ -83,6 +87,8 @@ TEST(PpuTest, drawWindow) {
   ppu.writeWx(7);
   ppu.init();
 
+  EXPECT_EQ(0, ppu.readWy());
+  EXPECT_EQ(7, ppu.readWx());
   EXPECT_EQ(PpuMode::OamScan, ppu.getMode());
   for (u64 ly = 0; ly < 80; ly++) {
     ppu.tick();
@@ -115,6 +121,7 @@ TEST(PpuTest, drawSprite) {
   ppu.writeObp0(0b11000000);
   ppu.init();
 
+  EXPECT_EQ(0b11000000, ppu.readObp0());
   for (u64 ly = 0; ly < 80; ly++) {
     ppu.tick();
   }

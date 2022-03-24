@@ -35,6 +35,17 @@ TEST(SpriteTest, getTileDataAddress) {
 
   EXPECT_EQ(0xff, sprite_flip.getTileIndex());
   EXPECT_EQ(17, sprite_flip.getY());
+  EXPECT_EQ(8, sprite_flip.getX());
+}
+
+TEST(SpriteTest, getPixelIndex) {
+  Sprite sprite_not_flip(16, 8, 0xff, 0);
+  EXPECT_EQ(0, sprite_not_flip.getPixelIndex(0));
+  EXPECT_EQ(7, sprite_not_flip.getPixelIndex(7));
+
+  Sprite sprite_flip(16, 8, 0xff, 0b00100000);
+  EXPECT_EQ(7, sprite_flip.getPixelIndex(0));
+  EXPECT_EQ(0, sprite_flip.getPixelIndex(7));
 }
 
 }  // namespace gbeml
