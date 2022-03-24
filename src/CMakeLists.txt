@@ -48,20 +48,29 @@ if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
         gbeml_core PRIVATE
         # -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded
         -Werror -Wall -Wextra
-        --coverage
+        $<$<CONFIG:DEBUG>:-fsanitize=address,undefined>
+        $<$<CONFIG:DEBUG>:--coverage>
+    )
+    target_link_options(
+        gbeml_core PRIVATE
+        $<$<CONFIG:DEBUG>:-fsanitize=address,undefined>
+        $<$<CONFIG:DEBUG>:--coverage>
     )
 else()
     target_compile_options(
         gbeml_core PRIVATE
         -Werror -Wall -Wextra -Wno-return-type
-        --coverage
+        $<$<CONFIG:DEBUG>:--coverage>
+    )
+    target_link_options(
+        gbeml_core PRIVATE
+        $<$<CONFIG:DEBUG>:--coverage>
     )
 endif()
 target_link_libraries(
     gbeml_core
     glog
 )
-target_link_options(gbeml_core PRIVATE --coverage)
 target_include_directories(gbeml_core PUBLIC . ${CMAKE_SOURCE_DIR}/third_party/debugbreak)
 
 add_executable(
@@ -88,6 +97,8 @@ add_executable(
     core/graphics/sprite_test.cc
     core/graphics/tile_test.cc
     core/joypad/joypad_impl_test.cc
+    core/timer/timer_impl_test.cc
+    core/interrupt/interrupt_controller_impl_test.cc
 )
 target_link_libraries(
     gbeml_test
@@ -95,7 +106,12 @@ target_link_libraries(
     gtest_main
     gmock_main
 )
-target_compile_options(gbeml_test PRIVATE)
+target_compile_options(
+    gbeml_test PRIVATE
+)
+target_link_options(
+    gbeml_test PRIVATE
+)
 add_dependencies(gbeml_test clean_gcda)
 
 include(GoogleTest)
