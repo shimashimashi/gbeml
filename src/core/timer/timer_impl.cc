@@ -10,7 +10,7 @@ void TimerImpl::tick() {
 }
 
 void TimerImpl::tickDivider() {
-  if (div_cycles++ % 256 == 0) {
+  if (++div_cycles % 256 == 0) {
     div.increment();
   }
 }
