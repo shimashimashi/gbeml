@@ -13,9 +13,6 @@ std::vector<SpritePixel> PixelFetcher::fetchSpritePixels(
     const SpritePalette& palette = sprite.getPaletteNumber() ? obp1 : obp0;
 
     Tile tile(low, high, palette);
-    if (sprite.flipX()) {
-      tile.reverse();
-    }
 
     for (u8 i = 0; i < 8; ++i) {
       if (pixels[i].getColor() != Color::Transparent) {

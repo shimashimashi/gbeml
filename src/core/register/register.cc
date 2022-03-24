@@ -9,24 +9,14 @@ u8 Register::get() const { return value; }
 bool Register::getAt(u8 i) const { return value >> i & 1; }
 
 u8 Register::slice(u8 from, u8 to) const {
-  u8 code = value;
-  code >>= from;
-
-  u8 mask = 1;
-  while (to > from) {
-    mask <<= 1;
-    mask |= 1;
-    to--;
-  }
-
-  return code & mask;
+  u8 mask = 0xff >> (7 - to);
+  return (value & mask) >> from;
 }
 
 void Register::set(u8 n) { value = n; }
 
 void Register::setAt(u8 i, bool b) {
-  u8 n = 1;
-  n <<= i;
+  u8 n = 1 << i;
   if (b) {
     value |= n;
   } else {

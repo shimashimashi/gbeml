@@ -16,7 +16,13 @@ bool Sprite::flipX() const { return flags.getAt(5); }
 
 bool Sprite::getPaletteNumber() const { return flags.getAt(4); }
 
-u8 Sprite::getPixelIndex(u8 current_x) const { return current_x - (x - 8); }
+u8 Sprite::getPixelIndex(u8 current_x) const {
+  if (flipX()) {
+    return x - 1 - current_x;
+  } else {
+    return current_x - (x - 8);
+  }
+}
 
 bool Sprite::isVisibleVertically(u8 ly, SpriteSize size) const {
   if (x == 0) {

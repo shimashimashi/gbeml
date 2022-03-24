@@ -10,15 +10,15 @@ namespace gbeml {
 
 class Tile {
  public:
-  Tile(u8 low, u8 high, const Palette& palette);
+  Tile(u8 low_, u8 high_, const Palette& palette_)
+      : low(low_), high(high_), palette(palette_) {}
 
   Color getAt(u8 index) const;
-  void setAt(u8 index, Color color);
-  void reverse();
-  u64 size() const;
 
  private:
-  std::vector<Color> colors;
+  u8 low;
+  u8 high;
+  const Palette& palette;
 };
 
 }  // namespace gbeml
