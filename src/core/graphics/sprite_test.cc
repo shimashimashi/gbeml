@@ -35,6 +35,7 @@ TEST(SpriteTest, getTileDataAddress) {
 
   EXPECT_EQ(0xff, sprite_flip.getTileIndex());
   EXPECT_EQ(17, sprite_flip.getY());
+  EXPECT_EQ(8, sprite_flip.getX());
 }
 
 TEST(SpriteTest, getPixelIndex) {
