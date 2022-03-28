@@ -18,13 +18,10 @@ add_library(
     gbeml_core SHARED
     gameboy.cc
     types/types.cc
-    bus/bus.cc
     bus/bus_impl.cc
-    interrupt/interrupt_controller.cc
     interrupt/interrupt_controller_impl.cc
     register/register.cc
     memory/mbc.cc
-    memory/ram.cc
     memory/ram_impl.cc
     memory/rom.cc
     cpu/alu.cc
@@ -35,15 +32,11 @@ add_library(
     graphics/lcd_stat.cc
     graphics/palette.cc
     graphics/pixel.cc
-    graphics/ppu.cc
     graphics/ppu_impl.cc
     graphics/sprite.cc
     graphics/tile.cc
-    display/display.cc
     display/display_impl.cc
-    timer/timer.cc
     timer/timer_impl.cc
-    joypad/joypad.cc
     joypad/joypad_impl.cc
 )
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
@@ -104,6 +97,7 @@ add_executable(
     joypad/joypad_impl_test.cc
     timer/timer_impl_test.cc
     interrupt/interrupt_controller_impl_test.cc
+    display/display_impl_test.cc
 )
 target_link_libraries(
     gbeml_test

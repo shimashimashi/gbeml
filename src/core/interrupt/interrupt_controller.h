@@ -8,7 +8,7 @@ namespace gbeml {
 
 class InterruptController {
  public:
-  virtual ~InterruptController();
+  virtual ~InterruptController() {}
 
   virtual u8 readInterruptFlag() const = 0;
   virtual void writeInterruptFlag(u8 value) = 0;

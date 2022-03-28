@@ -7,7 +7,7 @@ namespace gbeml {
 
 class Ram {
  public:
-  virtual ~Ram();
+  virtual ~Ram() {}
   virtual u8 read(u16 addr) const = 0;
   virtual void write(u16 addr, u8 value) = 0;
 };

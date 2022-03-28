@@ -1,12 +1,10 @@
 #include "core/memory/mbc.h"
 
-#include "core/log/logging.h"
-
 #include <iostream>
 
-namespace gbeml {
+#include "core/log/logging.h"
 
-Mbc::~Mbc() {}
+namespace gbeml {
 
 u8 RomOnly::readRom(const u16 addr) const { return rom.read(addr); }
 
