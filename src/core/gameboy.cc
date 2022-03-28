@@ -1,8 +1,7 @@
 #include "gameboy.h"
 
-#include <debugbreak.h>
-
 #include "core/bus/bus_impl.h"
+#include "core/display/display_impl.h"
 #include "core/graphics/ppu_impl.h"
 #include "core/interrupt/interrupt_controller_impl.h"
 #include "core/joypad/joypad_impl.h"
@@ -19,6 +18,7 @@ void GameBoy::tick() {
 }
 
 bool GameBoy::init(const std::string& filename) {
+  display = new DisplayImpl();
   ic = new InterruptControllerImpl(0xe1, 0x00);
   timer = new TimerImpl(ic, 0xab, 0x00, 0x00, 0xf8);
   joypad = new JoypadImpl(ic);

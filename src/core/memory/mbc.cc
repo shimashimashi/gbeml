@@ -1,6 +1,6 @@
 #include "core/memory/mbc.h"
 
-#include <glog/logging.h>
+#include "core/log/logging.h"
 
 #include <iostream>
 

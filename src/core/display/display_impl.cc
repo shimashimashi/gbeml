@@ -1,10 +1,10 @@
-#include "driver/stub/stub_display.h"
+#include "core/display/display_impl.h"
 
-#include "glog/logging.h"
+#include "core/log/logging.h"
 
 namespace gbeml {
 
-void StubDisplay::render(u8 x, u8 y, Color pixel) {
+void DisplayImpl::render(u8 x, u8 y, Color pixel) {
   u32 rgb = 0;
   switch (pixel) {
     case Color::White:
@@ -27,6 +27,6 @@ void StubDisplay::render(u8 x, u8 y, Color pixel) {
   buffer[y * 160 + x] = rgb;
 }
 
-u32* StubDisplay::getBuffer() { return buffer; }
+u32* DisplayImpl::getBuffer() { return buffer; }
 
 }  // namespace gbeml

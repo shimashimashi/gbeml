@@ -4,3 +4,6 @@
 [submodule "third_party/debugbreak"]
 	path = third_party/debugbreak
 	url = https://github.com/scottt/debugbreak
+[submodule "third_party/emsdk"]
+	path = third_party/emsdk
+	url = https://github.com/emscripten-core/emsdk

@@ -1,8 +1,6 @@
 #ifndef GBEML_DISPLAY_H_
 #define GBEML_DISPLAY_H_
 
-#include <array>
-
 #include "core/graphics/color.h"
 #include "core/types/types.h"
 
