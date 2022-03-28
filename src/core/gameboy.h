@@ -18,8 +18,7 @@ namespace gbeml {
 
 class GameBoy {
  public:
-  GameBoy(Display* display_, i32 breakpoint_)
-      : display(display_), breakpoint(breakpoint_) {}
+  GameBoy(i32 breakpoint_) : breakpoint(breakpoint_) {}
   void tick();
   bool init(const std::string& filename);
   Display* getDisplay() const;

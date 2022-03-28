@@ -12,7 +12,7 @@ enum class BankingMode { SimpleRomBankingMode, RamBankingMode };
 
 class Mbc {
  public:
-  virtual ~Mbc();
+  virtual ~Mbc() {}
 
   virtual u8 readRom(const u16 addr) const = 0;
   virtual u8 readRam(const u16 addr) const = 0;

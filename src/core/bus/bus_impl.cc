@@ -1,6 +1,6 @@
 #include "core/bus/bus_impl.h"
 
-#include <glog/logging.h>
+#include "core/log/logging.h"
 
 #include <iostream>
 

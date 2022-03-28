@@ -1,6 +1,6 @@
 #include "core/memory/rom.h"
 
-#include <glog/logging.h>
+#include "core/log/logging.h"
 
 #include <cassert>
 #include <fstream>

@@ -8,7 +8,7 @@ namespace gbeml {
 
 class Timer {
  public:
-  virtual ~Timer();
+  virtual ~Timer() {}
 
   virtual void tick() = 0;
 

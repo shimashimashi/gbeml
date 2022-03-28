@@ -13,7 +13,7 @@ enum class JoypadMode { Action, Direction };
 
 class Joypad {
  public:
-  virtual ~Joypad();
+  virtual ~Joypad() {}
 
   virtual u8 read() const = 0;
   virtual void write(u8 value) = 0;

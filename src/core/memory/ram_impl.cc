@@ -1,6 +1,6 @@
 #include "core/memory/ram_impl.h"
 
-#include <glog/logging.h>
+#include "core/log/logging.h"
 
 namespace gbeml {
 

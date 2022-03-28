@@ -10,7 +10,7 @@ namespace gbeml {
 
 class Ppu {
  public:
-  virtual ~Ppu();
+  virtual ~Ppu() {}
 
   virtual void tick() = 0;
   virtual void init() = 0;

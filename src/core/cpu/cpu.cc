@@ -1,7 +1,9 @@
 #include "core/cpu/cpu.h"
 
+#ifndef __EMSCRIPTEN__
 #include <debugbreak.h>
-#include <glog/logging.h>
+#endif
+#include "core/log/logging.h"
 
 namespace gbeml {
 
@@ -46,9 +48,11 @@ void Cpu::tick() {
     return;
   }
 
+#ifndef __EMSCRIPTEN__
   if (breakpoint > -1 && breakpoint == get_pc()) {
     debug_break();
   }
+#endif
 
   if (ic->isInterruptRequested()) {
     halted = false;
