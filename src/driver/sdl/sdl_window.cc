@@ -11,7 +11,8 @@ bool SdlWindow::init() {
     DCHECK(false);
     return false;
   }
-  if (SDL_CreateWindowAndRenderer(width, height, 0, &window, &renderer) == -1) {
+  if (SDL_CreateWindowAndRenderer(width * 4, height * 4, 0, &window,
+                                  &renderer) == -1) {
     DCHECK(false);
     return false;
   }
@@ -28,8 +29,10 @@ void SdlWindow::runFrame() {
 
   u32 *buffer = gb->getDisplay()->getBuffer();
   u32 *pixels = (u32 *)surface->pixels;
-  for (int i = 0; i < 23040; i++) {
-    pixels[i] = buffer[i];
+  for (int y = 0; y < 144; ++y) {
+    for (int x = 0; x < 160; ++x) {
+      pixels[x + y * width] = buffer[x + y * width];
+    }
   }
 
   if (SDL_MUSTLOCK(surface)) SDL_UnlockSurface(surface);
@@ -37,7 +40,8 @@ void SdlWindow::runFrame() {
   SDL_Texture *screenTexture = SDL_CreateTextureFromSurface(renderer, surface);
 
   SDL_RenderClear(renderer);
-  SDL_RenderCopy(renderer, screenTexture, NULL, NULL);
+  SDL_RenderCopyEx(renderer, screenTexture, NULL, NULL, NULL, NULL,
+                   SDL_FLIP_NONE);
   SDL_RenderPresent(renderer);
 
   SDL_DestroyTexture(screenTexture);
