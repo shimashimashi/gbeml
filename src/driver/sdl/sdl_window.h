@@ -21,8 +21,8 @@ class SdlWindow {
   SDL_Renderer *renderer;
   SDL_Surface *surface;
 
-  const u8 width = 160;
-  const u8 height = 144;
+  const u64 width = 160;
+  const u64 height = 144;
 
   void handleKeyDown(SDL_KeyboardEvent event);
   void handleKeyUp(SDL_KeyboardEvent event);
