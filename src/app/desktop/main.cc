@@ -24,12 +24,9 @@ void runSdl(gbeml::GameBoy *gb) {
   while (true) {
     Uint64 start = SDL_GetPerformanceCounter();
 
-    SDL_Event event;
-    SDL_PollEvent(&event);
-    if (event.type == SDL_QUIT) {
+    if (!window.runLoop()) {
       break;
     }
-    window.runLoop(event);
 
     Uint64 end = SDL_GetPerformanceCounter();
     float elapsedMS =

@@ -13,7 +13,7 @@ class SdlWindow {
 
   bool init();
   void runFrame();
-  void runLoop(SDL_Event event);
+  bool runLoop();
 
  private:
   GameBoy *gb;

@@ -38,6 +38,7 @@ class MockInterruptController : public InterruptController {
 
 TEST(JoypadImplTest, pressAction) {
   MockInterruptController ic;
+  EXPECT_CALL(ic, signalJoypad()).Times(testing::AnyNumber());
 
   JoypadImpl joypad_impl(&ic);
 
@@ -66,6 +67,7 @@ TEST(JoypadImplTest, pressAction) {
 
 TEST(JoypadImplTest, pressDirection) {
   MockInterruptController ic;
+  EXPECT_CALL(ic, signalJoypad()).Times(testing::AnyNumber());
 
   JoypadImpl joypad_impl(&ic);
 
