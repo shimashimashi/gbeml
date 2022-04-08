@@ -37,6 +37,7 @@ class MockInterruptController : public InterruptController {
 
 TEST(TimerImplTest, tickDivider) {
   MockInterruptController ic;
+  EXPECT_CALL(ic, signalTimer()).Times(testing::AnyNumber());
 
   TimerImpl timer(&ic, 0, 0, 0, 0);
 
@@ -52,6 +53,7 @@ TEST(TimerImplTest, tickDivider) {
 
 TEST(TimerImplTest, tickCounter1024) {
   MockInterruptController ic;
+  EXPECT_CALL(ic, signalTimer()).Times(testing::AnyNumber());
 
   TimerImpl timer(&ic, 0, 0, 0, 0b00000100);
 
@@ -64,6 +66,7 @@ TEST(TimerImplTest, tickCounter1024) {
 
 TEST(TimerImplTest, tickCounter16) {
   MockInterruptController ic;
+  EXPECT_CALL(ic, signalTimer()).Times(testing::AnyNumber());
 
   TimerImpl timer(&ic, 0, 0, 0, 0b00000101);
 
@@ -77,6 +80,7 @@ TEST(TimerImplTest, tickCounter16) {
 
 TEST(TimerImplTest, tickCounter64) {
   MockInterruptController ic;
+  EXPECT_CALL(ic, signalTimer()).Times(testing::AnyNumber());
 
   TimerImpl timer(&ic, 0, 0, 0, 0b00000110);
 
@@ -89,6 +93,7 @@ TEST(TimerImplTest, tickCounter64) {
 
 TEST(TimerImplTest, tickCounter256) {
   MockInterruptController ic;
+  EXPECT_CALL(ic, signalTimer()).Times(testing::AnyNumber());
 
   TimerImpl timer(&ic, 0, 0, 0, 0b00000111);
 
@@ -101,6 +106,7 @@ TEST(TimerImplTest, tickCounter256) {
 
 TEST(TimerImplTest, tickCounterDisabled) {
   MockInterruptController ic;
+  EXPECT_CALL(ic, signalTimer()).Times(testing::AnyNumber());
 
   TimerImpl timer(&ic, 0, 0, 0, 0b00000011);
 

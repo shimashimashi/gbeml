@@ -70,6 +70,48 @@ TEST(PpuTest, moveNext) {
   EXPECT_EQ(PpuMode::OamScan, ppu.getMode());
 }
 
+TEST(PpuTest, moveNextWindow) {
+  MockDisplay display;
+  MockVRam vram;
+  MockOam oam;
+  InterruptControllerImpl ic;
+  PpuImpl ppu(&display, &vram, &oam, &ic);
+
+  EXPECT_CALL(display, render(testing::_, testing::_, testing::_))
+      .Times(testing::AnyNumber());
+  EXPECT_CALL(vram, read(testing::_)).Times(testing::AnyNumber());
+  EXPECT_CALL(oam, read(testing::_)).Times(testing::AnyNumber());
+
+  ppu.writeLy(0);
+  ppu.writeLcdc(0b10100001);
+  ppu.writeWy(0);
+  ppu.writeWx(7);
+  ppu.init();
+
+  EXPECT_EQ(PpuMode::OamScan, ppu.getMode());
+  for (u64 ly = 0; ly < 154; ly++) {
+    for (u64 lx = 0; lx < 456; lx++) {
+      if (ly < 144) {
+        EXPECT_EQ(ly, ppu.readLy());
+        if (lx < 80) {
+          EXPECT_EQ(PpuMode::OamScan, ppu.getMode());
+          EXPECT_EQ(0xff, ppu.readOam(0));
+        } else if (lx < 81) {
+          EXPECT_EQ(PpuMode::DrawingBackground, ppu.getMode());
+        } else if (lx < 258) {
+          EXPECT_EQ(PpuMode::DrawingWindow, ppu.getMode());
+        } else {
+          EXPECT_EQ(PpuMode::HBlank, ppu.getMode());
+        }
+      } else {
+        EXPECT_EQ(PpuMode::VBlank, ppu.getMode());
+      }
+      ppu.tick();
+    }
+  }
+  EXPECT_EQ(PpuMode::OamScan, ppu.getMode());
+}
+
 TEST(PpuTest, drawWindow) {
   MockDisplay display;
   MockVRam vram;

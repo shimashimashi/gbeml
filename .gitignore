@@ -2,3 +2,7 @@ build
 .vscode
 /rom
 .DS_Store
+public/index.data
+public/index.js
+public/index.wasm
+*.sav

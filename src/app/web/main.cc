@@ -75,11 +75,7 @@ void releaseButton(int id) {
 }
 }
 
-void mainLoop() {
-  SDL_Event event;
-  SDL_PollEvent(&event);
-  window->runLoop(event);
-}
+void mainLoop() { window->runLoop(); }
 
 int main(int argc, char *argv[]) {
   gb = new gbeml::GameBoy(-1);

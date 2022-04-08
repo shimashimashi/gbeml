@@ -282,6 +282,8 @@ void PpuImpl::enterDrawingWindow() {
   pixel_fetcher.reset();
   if (wx < 7) {
     num_unused_pixels = 7 - wx;
+  } else {
+    num_unused_pixels = 0;
   }
   window_line_counter++;
   fetchWindowPixels();

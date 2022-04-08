@@ -40,14 +40,20 @@ void SdlWindow::runFrame() {
   SDL_Texture *screenTexture = SDL_CreateTextureFromSurface(renderer, surface);
 
   SDL_RenderClear(renderer);
-  SDL_RenderCopyEx(renderer, screenTexture, NULL, NULL, NULL, NULL,
+  SDL_RenderCopyEx(renderer, screenTexture, NULL, NULL, 0.0, NULL,
                    SDL_FLIP_NONE);
   SDL_RenderPresent(renderer);
 
   SDL_DestroyTexture(screenTexture);
 }
 
-void SdlWindow::runLoop(SDL_Event event) {
+bool SdlWindow::runLoop() {
+  SDL_Event event;
+  SDL_PollEvent(&event);
+  if (event.type == SDL_QUIT) {
+    return false;
+  }
+
   switch (event.type) {
     case SDL_KEYDOWN:
       handleKeyDown(event.key);
@@ -60,6 +66,7 @@ void SdlWindow::runLoop(SDL_Event event) {
   }
 
   runFrame();
+  return true;
 }
 
 void SdlWindow::handleKeyDown(SDL_KeyboardEvent event) {
